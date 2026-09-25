@@ -97,7 +97,12 @@
 
   $("autora").textContent = cfg.nomeAutora || "";
   if (cfg.formularioSugestao) { $("link-form").href = cfg.formularioSugestao; $("sugerir").hidden = false; }
-  if (cfg.instagram) { $("link-insta").href = cfg.instagram; $("link-insta").hidden = false; }
+  if (cfg.instagram) {
+    const perfil = cfg.instagram.replace(/\/+$/, "").split("/").pop();
+    $("link-insta").href = cfg.instagram;
+    $("link-insta").textContent = "Instagram @" + perfil;
+    $("link-insta").hidden = false;
+  }
   $("busca").addEventListener("input", renderLista);
 
   carregar().then((lista) => { praticas = lista; renderFiltros(); renderLista(); });

@@ -9,7 +9,7 @@ window.CONFIG = {
   formularioSugestao: "",
 
   // Instagram (opcional), ex.: "https://instagram.com/praticasinclusivas"
-  instagram: "",
+  instagram: "https://www.instagram.com/afabianakarina/",
 
   nomeAutora: "Fabiana Karina",
 };
