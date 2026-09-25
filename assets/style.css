@@ -92,3 +92,29 @@ details li { margin-bottom: 6px; }
 }
 .footer { color: var(--muted); font-size: 14px; padding-top: 24px; padding-bottom: 40px; }
 .footer a { color: var(--accent); }
+
+h2 { font-size: 28px; margin: 0 0 6px; }
+.sec-lead { color: var(--muted); margin: 0 0 20px; }
+.galeria-sec { margin-top: 56px; }
+.galeria { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.galeria figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.galeria img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.galeria figcaption { padding: 10px 14px; font-size: 14px; color: var(--muted); }
+
+.autora {
+  display: flex; gap: 24px; align-items: center; margin-top: 56px;
+  padding: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+}
+.autora h2 { margin-top: 4px; }
+.autora p:last-child { margin: 0; color: var(--muted); }
+.autora-foto {
+  flex: 0 0 132px; width: 132px; height: 132px; border-radius: 50%;
+  background: var(--accent-soft) center / cover no-repeat;
+  display: grid; place-items: center;
+  font-family: "Fraunces", Georgia, serif; font-size: 44px; color: var(--accent);
+}
+@media (max-width: 560px) {
+  .autora { flex-direction: column; text-align: center; }
+}
+
+.card-foto { display: block; width: calc(100% + 40px); margin: -20px -20px 14px; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--radius) var(--radius) 0 0; }

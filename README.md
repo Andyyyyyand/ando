@@ -46,10 +46,25 @@ A primeira linha tem que manter exatamente estes nomes:
 | `materiais` | O que precisa |
 | `tempo` | Tempo de preparo ou aplicação |
 | `autor` | Quem contribuiu |
+| `foto` | Opcional: link de uma imagem, ou caminho na pasta `fotos/` (ex.: `fotos/rotina.jpg`) |
 
 ## 3. Sugestões de professores (opcional)
 
 Crie um Google Forms com as mesmas perguntas das colunas e cole o link no campo `formularioSugestao` do `config.js`. Aparece um botão "Sugerir uma prática" no site. As respostas caem numa planilha; a Fabiana revisa e copia as boas para a planilha principal.
+
+## Fotos
+
+Há três lugares para fotos, todos configurados em `config.js`, com os arquivos na pasta `fotos/`:
+
+| Onde | Campo | Para quê |
+|---|---|---|
+| "Quem organiza" | `fotoAutora` | Retrato da Fabiana. Sem foto, aparecem as iniciais |
+| "Na prática" | `galeria` | Registros do trabalho em sala, com legenda. A seção só aparece quando há fotos |
+| Cartão da prática | coluna `foto` da planilha | Imagem do material ou da atividade |
+
+Use fotos em JPG com até ~300 KB cada, para o site carregar rápido no celular.
+
+> **Fotos com crianças:** só publique com autorização por escrito dos responsáveis (ECA e LGPD). Na dúvida, prefira fotos do material, de mãos trabalhando ou tiradas de costas, sem rosto e sem nome ou uniforme identificável.
 
 ## 4. Domínio próprio (Hostinger)
 

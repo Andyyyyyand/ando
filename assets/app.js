@@ -1,6 +1,6 @@
 (function () {
   const cfg = window.CONFIG || {};
-  const COLUNAS = ["titulo", "categoria", "publico", "situacao", "estrategia", "materiais", "tempo", "autor"];
+  const COLUNAS = ["titulo", "categoria", "publico", "situacao", "estrategia", "materiais", "tempo", "autor", "foto"];
   let praticas = [];
   let categoriaAtiva = "Todas";
 
@@ -48,6 +48,7 @@
   function cartao(p) {
     const passos = p.estrategia.split(/\n+/).map((s) => s.trim()).filter(Boolean);
     return el("article", { class: "card" },
+      p.foto ? el("img", { class: "card-foto", src: p.foto, alt: p.titulo, loading: "lazy" }) : null,
       el("span", { class: "tag" }, p.categoria || "Geral"),
       el("h3", {}, p.titulo),
       p.publico ? el("p", { class: "publico" }, p.publico) : null,
@@ -96,6 +97,19 @@
   }
 
   $("autora").textContent = cfg.nomeAutora || "";
+  $("autora-nome").textContent = cfg.nomeAutora || "";
+  $("autora-bio").textContent = cfg.bioAutora || "";
+  if (cfg.fotoAutora) $("autora-foto").style.backgroundImage = `url("${cfg.fotoAutora}")`;
+  else $("autora-foto").textContent = (cfg.nomeAutora || "").split(" ").map((n) => n[0]).slice(0, 2).join("");
+
+  const galeria = cfg.galeria || [];
+  if (galeria.length) {
+    $("galeria").replaceChildren(...galeria.map((f) =>
+      el("figure", {},
+        el("img", { src: f.arquivo, alt: f.legenda || "", loading: "lazy" }),
+        f.legenda ? el("figcaption", {}, f.legenda) : null)));
+    $("na-pratica").hidden = false;
+  }
   if (cfg.formularioSugestao) { $("link-form").href = cfg.formularioSugestao; $("sugerir").hidden = false; }
   if (cfg.instagram) {
     const perfil = cfg.instagram.replace(/\/+$/, "").split("/").pop();
