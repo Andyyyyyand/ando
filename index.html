@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Práticas Inclusivas</title>
+  <meta name="description" content="Banco de ideias e práticas pedagógicas para apoiar crianças com dificuldades de aprendizagem, transtornos de comportamento e deficiências.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Banco de práticas pedagógicas</p>
+      <h1>Práticas Inclusivas</h1>
+      <p class="lead">Ideias simples e testadas em sala para apoiar crianças com dificuldades de aprendizagem, transtornos de comportamento e deficiências.</p>
+      <div class="search">
+        <label for="busca" class="sr-only">Buscar prática</label>
+        <input id="busca" type="search" placeholder="Busque por situação, ex.: não fica sentado, leitura, rotina…" autocomplete="off">
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav id="filtros" class="chips" aria-label="Filtrar por categoria"></nav>
+    <p id="contagem" class="count" aria-live="polite"></p>
+    <section id="lista" class="grid"></section>
+    <p id="vazio" class="empty" hidden>Nenhuma prática encontrada. Tente outra palavra.</p>
+
+    <aside id="sugerir" class="cta" hidden>
+      <h2>Você tem uma prática que funciona?</h2>
+      <p>Compartilhe com outros professores. Sua sugestão pode aparecer aqui.</p>
+      <a id="link-form" class="btn" target="_blank" rel="noopener">Sugerir uma prática</a>
+    </aside>
+  </main>
+
+  <footer class="wrap footer">
+    <p>Organizado por <span id="autora"></span> · Ensino colaborativo</p>
+    <p><a id="link-insta" target="_blank" rel="noopener" hidden>Instagram</a></p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
