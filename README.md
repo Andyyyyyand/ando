@@ -20,7 +20,7 @@ Enquanto a planilha não estiver configurada, o site usa `data/praticas.csv`, qu
 ## 1. Publicar o site (GitHub Pages)
 
 1. No GitHub, abra o repositório e vá em **Settings → Pages**.
-2. Em *Source*, escolha **Deploy from a branch**, selecione a branch `main` e a pasta `/ (root)`, e clique em **Save**.
+2. Em *Source*, escolha **Deploy from a branch**, selecione a branch onde está o site (hoje, `claude/jesse-contexto-sugestoes-t0tqb4`; se depois juntar na `main`, troque para `main`) e a pasta `/ (root)`, e clique em **Save**.
 3. Em 1 a 2 minutos o site estará em `https://andyyyyyand.github.io/ando/`.
 
 > No plano gratuito do GitHub, o Pages só funciona com repositório **público**.
