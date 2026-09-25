@@ -28,6 +28,8 @@
   }
 
   function paraObjetos(linhas) {
+    if (!linhas.length) return [];
+    linhas[0][0] = linhas[0][0].replace(/^\uFEFF/, "");
     const cab = linhas.shift().map((h) => normalizar(h).replace(/\s+/g, ""));
     return linhas
       .map((l) => Object.fromEntries(COLUNAS.map((col) => [col, (l[cab.indexOf(col)] || "").trim()])))
@@ -82,17 +84,31 @@
     $("contagem").textContent = itens.length === 1 ? "1 prática" : itens.length + " práticas";
   }
 
+  // Accepts any Google Sheets link (edit, pubhtml or pub CSV) and returns a CSV URL.
+  function urlCSV(url) {
+    url = (url || "").trim();
+    const pub = url.match(/docs\.google\.com\/spreadsheets\/d\/e\/([\w-]+)/);
+    const doc = url.match(/docs\.google\.com\/spreadsheets\/d\/([\w-]+)/);
+    const gid = (url.match(/[#&?]gid=(\d+)/) || [])[1];
+    if (pub) return "https://docs.google.com/spreadsheets/d/e/" + pub[1] + "/pub?output=csv" + (gid ? "&gid=" + gid : "");
+    if (doc) return "https://docs.google.com/spreadsheets/d/" + doc[1] + "/gviz/tq?tqx=out:csv" + (gid ? "&gid=" + gid : "");
+    return url;
+  }
+
   async function carregar() {
-    const fontes = [cfg.planilhaCSV, "data/praticas.csv"].filter(Boolean);
+    const fontes = [urlCSV(cfg.planilhaCSV), "data/praticas.csv"].filter(Boolean);
     for (const url of fontes) {
       try {
         const r = await fetch(url, { cache: "no-store" });
-        if (!r.ok) continue;
+        if (!r.ok) throw new Error("HTTP " + r.status);
         const lista = paraObjetos(parseCSV(await r.text()));
         if (lista.length) return lista;
-      } catch (e) { /* try the next source */ }
+        throw new Error("nenhuma linha com a coluna 'titulo'");
+      } catch (e) {
+        console.warn("Práticas Inclusivas: não foi possível ler " + url + " (" + e.message + ")");
+      }
     }
-    return [];
+    return null;
   }
 
   $("autora").textContent = cfg.nomeAutora || "";
@@ -100,5 +116,14 @@
   if (cfg.instagram) { $("link-insta").href = cfg.instagram; $("link-insta").hidden = false; }
   $("busca").addEventListener("input", renderLista);
 
-  carregar().then((lista) => { praticas = lista; renderFiltros(); renderLista(); });
+  $("contagem").textContent = "Carregando práticas…";
+  carregar().then((lista) => {
+    if (!lista) {
+      $("contagem").textContent = "";
+      $("vazio").textContent = "Não foi possível carregar as práticas agora. Recarregue a página em alguns instantes.";
+      $("vazio").hidden = false;
+      return;
+    }
+    praticas = lista; renderFiltros(); renderLista();
+  });
 })();
