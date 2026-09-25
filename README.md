@@ -32,6 +32,8 @@ Enquanto a planilha não estiver configurada, o site usa `data/praticas.csv`, qu
 3. Vá em **Arquivo → Compartilhar → Publicar na Web**, escolha a aba e o formato **Valores separados por vírgula (.csv)**, e clique em **Publicar**.
 4. Copie o link gerado e cole em `config.js`, no campo `planilhaCSV`.
 
+> O site aceita qualquer link da planilha: o de "Publicar na Web" (CSV ou página) ou o link normal de edição. Com o link de edição, a planilha precisa estar compartilhada como **"Qualquer pessoa com o link pode ver"**.
+
 ### Colunas da planilha
 
 A primeira linha tem que manter exatamente estes nomes:
@@ -67,6 +69,16 @@ Crie um Google Forms com as mesmas perguntas das colunas e cole o link no campo 
 
 4. No GitHub, em **Settings → Pages → Custom domain**, digite o domínio (ex.: `praticasinclusivas.com.br`) e salve.
 5. Quando o DNS propagar (de alguns minutos a 24 h), marque **Enforce HTTPS**.
+
+## Problemas comuns
+
+| O que acontece | Causa provável | Como resolver |
+|---|---|---|
+| O site mostra só os 12 exemplos, não a planilha | Link errado em `planilhaCSV` ou planilha não publicada | Refaça o passo 2.3 e confira o link. No navegador, abra o console (F12) e procure a mensagem "Práticas Inclusivas: não foi possível ler…" |
+| Uma prática não aparece | A coluna `titulo` está vazia ou o cabeçalho foi renomeado | Preencha o título e mantenha os nomes da primeira linha |
+| Mudança na planilha não aparece | O Google leva alguns minutos para atualizar o CSV publicado | Aguarde até 5 minutos e recarregue |
+| "Não foi possível carregar as práticas agora" | Sem internet ou o site foi aberto direto do arquivo, sem servidor | Publique pelo GitHub Pages, ou teste localmente com `python3 -m http.server` e abra `http://localhost:8000` |
+| Botão "Sugerir uma prática" não aparece | `formularioSugestao` vazio em `config.js` | Cole o link do Google Forms |
 
 ## Estrutura
 
