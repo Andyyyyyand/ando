@@ -97,10 +97,15 @@
   }
 
   $("autora").textContent = cfg.nomeAutora || "";
-  $("autora-nome").textContent = cfg.nomeAutora || "";
-  $("autora-bio").textContent = cfg.bioAutora || "";
-  if (cfg.fotoAutora) $("autora-foto").style.backgroundImage = `url("${cfg.fotoAutora}")`;
-  else $("autora-foto").textContent = (cfg.nomeAutora || "").split(" ").map((n) => n[0]).slice(0, 2).join("");
+  const boasVindas = cfg.boasVindas || [];
+  if (boasVindas.length) {
+    const [saudacao, ...paragrafos] = boasVindas;
+    $("boas-vindas-texto").replaceChildren(
+      el("h2", {}, saudacao),
+      ...paragrafos.map((t) => el("p", {}, t)));
+    $("assinatura").textContent = cfg.nomeAutora || "";
+    $("boas-vindas").hidden = false;
+  }
 
   const galeria = cfg.galeria || [];
   if (galeria.length) {

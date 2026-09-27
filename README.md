@@ -52,13 +52,16 @@ A primeira linha tem que manter exatamente estes nomes:
 
 Crie um Google Forms com as mesmas perguntas das colunas e cole o link no campo `formularioSugestao` do `config.js`. Aparece um botão "Sugerir uma prática" no site. As respostas caem numa planilha; a Fabiana revisa e copia as boas para a planilha principal.
 
+## Mensagem de boas-vindas
+
+O texto de apresentação da Fabiana fica em `config.js`, no campo `boasVindas`: cada item é um parágrafo, e o primeiro vira o título.
+
 ## Fotos
 
-Há três lugares para fotos, todos configurados em `config.js`, com os arquivos na pasta `fotos/`:
+Há dois lugares para fotos, todos configurados em `config.js`, com os arquivos na pasta `fotos/`:
 
 | Onde | Campo | Para quê |
 |---|---|---|
-| "Quem organiza" | `fotoAutora` | Retrato da Fabiana. Sem foto, aparecem as iniciais |
 | "Na prática" | `galeria` | Registros do trabalho em sala, com legenda. A seção só aparece quando há fotos |
 | Cartão da prática | coluna `foto` da planilha | Imagem do material ou da atividade |
 

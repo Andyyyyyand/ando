@@ -13,11 +13,13 @@ window.CONFIG = {
 
   nomeAutora: "Fabiana Karina",
 
-  // Foto da Fabiana (coloque o arquivo na pasta fotos/).
-  fotoAutora: "",
-
-  // Texto de apresentação que aparece ao lado da foto.
-  bioAutora: "Professora da rede municipal e parte do projeto de ensino colaborativo da Prefeitura. Reúne aqui práticas que funcionam em sala para que nenhuma criança fique para trás.",
+  // Mensagem de boas-vindas (cada item é um parágrafo).
+  boasVindas: [
+    "Seja muito bem-vindo a este espaço!",
+    "Sou educadora apaixonada pela aprendizagem e pelo universo das crianças. Este espaço foi criado para compartilhar atividades pedagógicas, ideias, estratégias e materiais educativos pensados especialmente para tornar a aprendizagem mais significativa, prazerosa e acessível.",
+    "Acredito que cada criança aprende de uma maneira e no seu próprio tempo. Por isso, meu olhar psicopedagógico busca valorizar as potencialidades de cada aluno, principalmente daqueles que apresentam dificuldades no processo de aprendizagem.",
+    "Que possamos compartilhar ideias, experiências e possibilidades para tornar a educação cada vez mais inclusiva, afetiva e significativa!",
+  ],
 
   // Galeria "Na prática": fotos do trabalho em sala (pasta fotos/).
   // Exemplo: { arquivo: "fotos/rotina-visual.jpg", legenda: "Quadro de rotina com pictogramas" },
