@@ -6,6 +6,26 @@
 
   const $ = (id) => document.getElementById(id);
 
+  // One crayon color per category; new categories take the next free color.
+  const CORES_FIXAS = {
+    "leitura e escrita": "--c-ceu",
+    "matematica": "--c-sol",
+    "tdah e atencao": "--c-tangerina",
+    "tea": "--c-lilas",
+    "comportamento": "--c-coral",
+    "deficiencia intelectual": "--c-menta",
+    "altas habilidades": "--c-rosa",
+    "ensino colaborativo": "--c-turquesa",
+  };
+  const PALETA = ["--c-ceu", "--c-sol", "--c-tangerina", "--c-lilas", "--c-coral", "--c-menta", "--c-rosa", "--c-turquesa"];
+  const coresExtras = {};
+  function corDa(categoria) {
+    const chave = normalizar(categoria);
+    if (CORES_FIXAS[chave]) return `var(${CORES_FIXAS[chave]})`;
+    if (!coresExtras[chave]) coresExtras[chave] = PALETA[Object.keys(coresExtras).length % PALETA.length];
+    return `var(${coresExtras[chave]})`;
+  }
+
   // CSV parser that handles quotes, commas, and line breaks inside fields.
   function parseCSV(texto) {
     const linhas = [];
@@ -47,18 +67,19 @@
 
   function cartao(p) {
     const passos = p.estrategia.split(/\n+/).map((s) => s.trim()).filter(Boolean);
-    return el("article", { class: "card" },
+    return el("article", { class: "card", style: `--cor: ${corDa(p.categoria)}` },
       p.foto ? el("img", { class: "card-foto", src: p.foto, alt: p.titulo, loading: "lazy" }) : null,
       el("span", { class: "tag" }, p.categoria || "Geral"),
       el("h3", {}, p.titulo),
       p.publico ? el("p", { class: "publico" }, p.publico) : null,
-      p.situacao ? el("p", { class: "situacao" }, el("b", {}, "Situação: "), p.situacao) : null,
+      p.situacao ? el("p", { class: "situacao" }, el("b", {}, "a situação"), p.situacao) : null,
       el("details", {},
         el("summary", {}, "Ver estratégia"),
         el("ol", {}, passos.map((s) => el("li", {}, s))),
-        p.materiais ? el("p", { class: "meta" }, "Materiais: " + p.materiais) : null,
-        p.tempo ? el("p", { class: "meta" }, "Tempo: " + p.tempo) : null,
-        p.autor ? el("p", { class: "meta" }, "Contribuição: " + p.autor) : null
+        el("p", { class: "meta" },
+          p.materiais ? el("span", {}, el("b", {}, "Materiais: "), p.materiais) : null,
+          p.tempo ? el("span", {}, el("b", {}, "Tempo: "), p.tempo) : null,
+          p.autor ? el("span", {}, el("b", {}, "Por: "), p.autor) : null)
       )
     );
   }
@@ -66,7 +87,9 @@
   function renderFiltros() {
     const cats = ["Todas", ...new Set(praticas.map((p) => p.categoria).filter(Boolean))];
     $("filtros").replaceChildren(...cats.map((c) => {
-      const b = el("button", { class: "chip", type: "button", "aria-pressed": String(c === categoriaAtiva) }, c);
+      const attrs = { class: "chip", type: "button", "aria-pressed": String(c === categoriaAtiva) };
+      if (c !== "Todas") attrs.style = `--cor: ${corDa(c)}`;
+      const b = el("button", attrs, c);
       b.onclick = () => { categoriaAtiva = c; renderFiltros(); renderLista(); };
       return b;
     }));
@@ -119,7 +142,7 @@
   if (cfg.instagram) {
     const perfil = cfg.instagram.replace(/\/+$/, "").split("/").pop();
     $("link-insta").href = cfg.instagram;
-    $("link-insta").textContent = "Instagram @" + perfil;
+    $("link-insta").textContent = "@" + perfil + " no Instagram";
     $("link-insta").hidden = false;
   }
   $("busca").addEventListener("input", renderLista);
