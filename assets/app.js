@@ -47,10 +47,26 @@
     return linhas;
   }
 
+  // Header names accepted for each column. Matching is by prefix, so a
+  // Google Forms question like "Título da prática" maps to "titulo".
+  const APELIDOS = {
+    titulo: ["titulo", "nomedapratica"],
+    categoria: ["categoria"],
+    publico: ["publico", "paraquem"],
+    situacao: ["situacao", "qualasituacao", "oqueacontece"],
+    estrategia: ["estrategia", "comofazer", "passo"],
+    materiais: ["materia"],
+    tempo: ["tempo"],
+    autor: ["autor", "contribu", "seunome"],
+    foto: ["foto", "imagem"],
+  };
+
   function paraObjetos(linhas) {
-    const cab = linhas.shift().map((h) => normalizar(h).replace(/\s+/g, ""));
+    const cab = linhas.shift().map((h) => normalizar(h).replace(/[^a-z0-9]/g, ""));
+    const indice = Object.fromEntries(COLUNAS.map((col) =>
+      [col, cab.findIndex((h) => APELIDOS[col].some((a) => h.startsWith(a)))]));
     return linhas
-      .map((l) => Object.fromEntries(COLUNAS.map((col) => [col, (l[cab.indexOf(col)] || "").trim()])))
+      .map((l) => Object.fromEntries(COLUNAS.map((col) => [col, indice[col] < 0 ? "" : (l[indice[col]] || "").trim()])))
       .filter((p) => p.titulo);
   }
 
@@ -119,11 +135,9 @@
     return [];
   }
 
-  $("autora").textContent = cfg.nomeAutora || "";
   if (cfg.proposito) {
     // Text between *asterisks* gets a highlighter mark.
     $("proposito-texto").replaceChildren(...cfg.proposito.split("*").map((t, i) => (i % 2 ? el("mark", {}, t) : t)));
-    $("proposito-autora").textContent = "— " + (cfg.nomeAutora || "");
     $("proposito").hidden = false;
   }
 
@@ -133,7 +147,6 @@
     $("boas-vindas-texto").replaceChildren(
       el("h2", {}, saudacao),
       ...paragrafos.map((t) => el("p", {}, t)));
-    $("assinatura").textContent = cfg.nomeAutora || "";
     $("boas-vindas").hidden = false;
   }
 
@@ -147,9 +160,8 @@
   }
   if (cfg.formularioSugestao) { $("link-form").href = cfg.formularioSugestao; $("sugerir").hidden = false; }
   if (cfg.instagram) {
-    const perfil = cfg.instagram.replace(/\/+$/, "").split("/").pop();
     $("link-insta").href = cfg.instagram;
-    $("link-insta").textContent = "@" + perfil + " no Instagram";
+    $("link-insta").textContent = "Siga no Instagram";
     $("link-insta").hidden = false;
   }
   $("busca").addEventListener("input", renderLista);

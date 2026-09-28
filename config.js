@@ -1,17 +1,16 @@
 // Configuração do site. Edite só os textos entre aspas.
 window.CONFIG = {
-  // Link da planilha do Google publicada como CSV
+  // Link da planilha de respostas do Google Forms, publicada como CSV
   // (Arquivo > Compartilhar > Publicar na Web > CSV).
   // Enquanto estiver vazio, o site usa o arquivo data/praticas.csv.
   planilhaCSV: "",
 
-  // Link do Google Forms para professores sugerirem práticas (opcional).
+  // Link público de um formulário para outros professores sugerirem práticas (opcional).
   formularioSugestao: "",
 
   // Instagram (opcional), ex.: "https://instagram.com/praticasinclusivas"
   instagram: "https://www.instagram.com/afabianakarina/",
 
-  nomeAutora: "Fabiana Karina",
 
   // Frase de propósito, em destaque. Trechos entre *asteriscos* ganham marca-texto.
   proposito: "Meu propósito é encontrar caminhos para que cada criança possa aprender, porque *todos são capazes de aprender* quando encontram o caminho certo!",

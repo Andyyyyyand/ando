@@ -1,71 +1,72 @@
 # Práticas Inclusivas
 
-Banco de ideias e práticas pedagógicas para apoiar crianças com dificuldades de aprendizagem, transtornos de comportamento e deficiências. Organizado por Fabiana Karina.
+Banco de ideias e práticas pedagógicas para apoiar crianças com dificuldades de aprendizagem, transtornos de comportamento e deficiências.
 
 **Custo:** zero. Paga-se só o domínio (opcional).
 
 | Parte | Ferramenta | Custo |
 |---|---|---|
 | Hospedagem | GitHub Pages | Grátis |
-| Conteúdo | Planilha do Google | Grátis |
-| Sugestões de professores | Google Forms (opcional) | Grátis |
+| Cadastro de práticas | Google Forms | Grátis |
+| Onde as práticas ficam guardadas | Planilha de respostas do Forms | Grátis |
 | Endereço próprio | Domínio na Hostinger | Só o domínio |
 
-## Como funciona
+## Como a organizadora atualiza o site
 
-O site lê as práticas de uma **planilha do Google**. A Fabiana adiciona ou edita linhas na planilha e o site se atualiza sozinho em poucos minutos. Ela não precisa mexer em código.
+- **Adicionar uma prática:** abrir o formulário (um link salvo no celular), responder as perguntas e tocar em **Enviar**. Em poucos minutos a prática aparece no site.
+- **Corrigir ou apagar:** abrir a planilha de respostas e mudar ou apagar a linha.
 
-Enquanto a planilha não estiver configurada, o site usa `data/praticas.csv`, que já vem com 12 práticas de exemplo.
+Ninguém precisa mexer em código. Enquanto o formulário não estiver ligado, o site mostra as 12 práticas de `data/praticas.csv`.
 
 ## 1. Publicar o site (GitHub Pages)
 
 1. No GitHub, abra o repositório e vá em **Settings → Pages**.
-2. Em *Source*, escolha **Deploy from a branch**, selecione a branch onde está o site (hoje, `claude/jesse-contexto-sugestoes-t0tqb4`; se depois juntar na `main`, troque para `main`) e a pasta `/ (root)`, e clique em **Save**.
+2. Em *Source*, escolha **Deploy from a branch**, selecione a branch onde está o site e a pasta `/ (root)`, e clique em **Save**.
 3. Em 1 a 2 minutos o site estará em `https://andyyyyyand.github.io/ando/`.
 
 > No plano gratuito do GitHub, o Pages só funciona com repositório **público**.
 
-## 2. Conectar a planilha
+## 2. Criar o formulário de cadastro (uma vez)
 
-1. Crie uma planilha no Google Sheets.
-2. Vá em **Arquivo → Importar** e envie o arquivo `data/praticas.csv`. Assim a planilha já nasce com as colunas certas e os 12 exemplos.
-3. Vá em **Arquivo → Compartilhar → Publicar na Web**, escolha a aba e o formato **Valores separados por vírgula (.csv)**, e clique em **Publicar**.
-4. Copie o link gerado e cole em `config.js`, no campo `planilhaCSV`.
+1. Em forms.google.com, crie um formulário com estas perguntas (os nomes precisam começar assim):
 
-### Colunas da planilha
+   | Pergunta | Tipo |
+   |---|---|
+   | Título da prática | Resposta curta |
+   | Categoria | Lista suspensa (TEA, TDAH e atenção, Comportamento, Leitura e escrita, Matemática, Deficiência intelectual, Altas habilidades, Ensino colaborativo) |
+   | Para quem é | Resposta curta |
+   | Situação | Parágrafo |
+   | Estratégia (um passo por linha) | Parágrafo |
+   | Materiais | Resposta curta |
+   | Tempo | Resposta curta |
 
-A primeira linha tem que manter exatamente estes nomes:
+2. Na aba **Respostas**, clique em **Vincular ao Planilhas** para criar a planilha de respostas.
+3. Na planilha, cole abaixo das respostas as 12 práticas de exemplo de `data/praticas.csv`, se quiser mantê-las.
+4. Na planilha, vá em **Arquivo → Compartilhar → Publicar na Web**, escolha a aba de respostas e o formato **CSV**, e clique em **Publicar**.
+5. Copie o link e cole em `config.js`, no campo `planilhaCSV`.
+6. Mande para a organizadora o link do formulário (para cadastrar) e compartilhe a planilha com ela como **Editor** (para corrigir).
 
-| Coluna | O que escrever |
-|---|---|
-| `titulo` | Nome curto da prática |
-| `categoria` | Vira um filtro no site, ex.: `TEA`, `TDAH e atenção` |
-| `publico` | Para quem é, ex.: `Autismo (TEA)` |
-| `situacao` | O problema que o professor enfrenta |
-| `estrategia` | Um passo por linha (dentro da célula, use **Alt+Enter** para quebrar a linha) |
-| `materiais` | O que precisa |
-| `tempo` | Tempo de preparo ou aplicação |
-| `autor` | Quem contribuiu |
-| `foto` | Opcional: link de uma imagem, ou caminho na pasta `fotos/` (ex.: `fotos/rotina.jpg`) |
+O site aceita tanto os nomes do formulário quanto os nomes curtos (`titulo`, `categoria`, `publico`, `situacao`, `estrategia`, `materiais`, `tempo`, `autor`, `foto`). Colunas extras, como a data e hora do Forms, são ignoradas. Uma categoria nova vira um filtro com cor própria automaticamente.
 
-## 3. Sugestões de professores (opcional)
+## 3. Sugestões de outros professores (opcional)
 
-Crie um Google Forms com as mesmas perguntas das colunas e cole o link no campo `formularioSugestao` do `config.js`. Aparece um botão "Sugerir uma prática" no site. As respostas caem numa planilha; a Fabiana revisa e copia as boas para a planilha principal.
+Crie um segundo formulário, público, e cole o link no campo `formularioSugestao` do `config.js`. Aparece um botão "Sugerir uma prática" no site. As respostas vão para outra planilha; a organizadora revisa e cadastra as boas no formulário principal.
 
-## Mensagem de boas-vindas
+## Textos do site
 
-O texto de apresentação da Fabiana fica em `config.js`, no campo `boasVindas`: cada item é um parágrafo, e o primeiro vira o título.
+Em `config.js`:
+- `proposito`: frase em destaque. Trechos entre `*asteriscos*` ganham marca-texto.
+- `boasVindas`: mensagem de boas-vindas. Cada item é um parágrafo, e o primeiro vira o título.
+- `instagram`: link do perfil.
 
 ## Fotos
 
-Há dois lugares para fotos, todos configurados em `config.js`, com os arquivos na pasta `fotos/`:
-
 | Onde | Campo | Para quê |
 |---|---|---|
-| "Na prática" | `galeria` | Registros do trabalho em sala, com legenda. A seção só aparece quando há fotos |
+| "Na prática" | `galeria` em `config.js` | Registros do trabalho em sala, com legenda. A seção só aparece quando há fotos |
 | Cartão da prática | coluna `foto` da planilha | Imagem do material ou da atividade |
 
-Use fotos em JPG com até ~300 KB cada, para o site carregar rápido no celular.
+Use fotos em JPG com até ~300 KB cada, na pasta `fotos/`.
 
 > **Fotos com crianças:** só publique com autorização por escrito dos responsáveis (ECA e LGPD). Na dúvida, prefira fotos do material, de mãos trabalhando ou tiradas de costas, sem rosto e sem nome ou uniforme identificável.
 
@@ -83,15 +84,15 @@ Use fotos em JPG com até ~300 KB cada, para o site carregar rápido no celular.
    | A | @ | 185.199.111.153 |
    | CNAME | www | andyyyyyand.github.io |
 
-4. No GitHub, em **Settings → Pages → Custom domain**, digite o domínio (ex.: `praticasinclusivas.com.br`) e salve.
+4. No GitHub, em **Settings → Pages → Custom domain**, digite o domínio e salve.
 5. Quando o DNS propagar (de alguns minutos a 24 h), marque **Enforce HTTPS**.
 
 ## Estrutura
 
 ```
 index.html        página
-config.js         links configuráveis (planilha, formulário, Instagram)
+config.js         textos e links (planilha, formulário, Instagram)
 assets/app.js     carrega a planilha, busca e filtros
 assets/style.css  visual (claro e escuro)
-data/praticas.csv práticas de exemplo e modelo da planilha
+data/praticas.csv práticas de exemplo
 ```
