@@ -67,6 +67,9 @@ nav.solid{background:rgba(251,244,236,.86);backdrop-filter:blur(14px);box-shadow
 .badge{position:absolute;right:-34px;bottom:56px;width:128px;height:128px;border-radius:50%;background:var(--cream);display:grid;place-items:center;text-align:center;font-family:var(--serif);font-size:1.05rem;line-height:1.15;padding:18px;box-shadow:0 20px 40px -16px rgba(90,50,45,.45);animation:float 6s ease-in-out infinite}
 .badge b{display:block;font-size:2.4rem;font-weight:500;color:var(--rose-deep);line-height:1}
 @keyframes float{50%{transform:translateY(-12px) rotate(3deg)}}
+.orb{position:absolute;border-radius:50%;object-fit:cover;border:5px solid var(--cream);box-shadow:0 20px 40px -16px rgba(90,50,45,.5);animation:float 7s ease-in-out infinite}
+.orb.o1{width:120px;height:120px;left:-70px;top:70px}
+.orb.o2{width:92px;height:92px;left:-30px;bottom:30px;animation-delay:-3s}
 .lotus-bg{position:absolute;left:-90px;bottom:-60px;width:420px;opacity:.5;pointer-events:none;animation:sway 14s ease-in-out infinite}
 @keyframes sway{50%{transform:rotate(5deg) translateY(-10px)}}
 .scroll-hint{position:absolute;left:50%;bottom:24px;translate:-50% 0;font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -86,22 +89,30 @@ section{padding:clamp(80px,12vw,150px) 0}
 .sec-head p{max-width:36ch;color:var(--ink-soft)}
 
 /* SERVICES */
-.services{display:grid;grid-template-columns:repeat(12,1fr);gap:22px}
-.card{position:relative;background:var(--sand);border-radius:28px;padding:38px 34px 34px;overflow:hidden;min-height:340px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .5s var(--ease),box-shadow .5s,background .5s}
-.card:nth-child(1){grid-column:span 7;background:var(--blush)}
-.card:nth-child(2){grid-column:span 5}
-.card:nth-child(3){grid-column:span 5;background:#EBD6D0}
-.card:nth-child(4){grid-column:span 7;background:var(--ink);color:var(--cream)}
-.card:hover{transform:translateY(-8px) rotate(-.4deg);box-shadow:0 34px 60px -30px rgba(90,50,45,.55)}
-.card .num{font-family:var(--serif);font-style:italic;font-size:1.1rem;color:var(--rose-deep)}
-.card:nth-child(4) .num{color:var(--rose)}
-.card h3{font-size:clamp(2rem,3.4vw,2.9rem);margin:14px 0 12px}
-.card p{max-width:34ch;font-size:.98rem;opacity:.85}
-.card .glyph{position:absolute;right:-30px;top:-30px;width:210px;height:210px;opacity:.22;transition:transform 1s var(--ease),opacity .5s}
-.card:hover .glyph{transform:rotate(30deg) scale(1.12);opacity:.4}
-.card .more{margin-top:26px;font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;display:inline-flex;gap:10px;align-items:center}
+.services{display:grid;grid-template-columns:repeat(4,1fr);gap:26px 22px}
+.card{position:relative;display:flex;flex-direction:column;background:var(--sand);border-radius:200px 200px 26px 26px;overflow:hidden;transition:transform .5s var(--ease),box-shadow .5s}
+.card:nth-child(4n+2),.card:nth-child(4n+4){margin-top:44px}
+.card:nth-child(3n+1){background:var(--blush)}
+.card:nth-child(3n+2){background:#EBD6D0}
+.card:hover{transform:translateY(-10px);box-shadow:0 34px 60px -30px rgba(90,50,45,.6)}
+.card .ph{aspect-ratio:4/4.4;overflow:hidden;position:relative}
+.card .ph img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease);filter:saturate(.92)}
+.card:hover .ph img{transform:scale(1.09)}
+.card .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(58,40,38,.28))}
+.card .txt{padding:22px 24px 26px;display:flex;flex-direction:column;gap:10px;flex:1}
+.card h3{font-size:1.75rem;line-height:1.05}
+.card p{font-size:.92rem;color:var(--ink-soft);line-height:1.55}
+.card .more{margin-top:auto;padding-top:8px;font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;display:inline-flex;gap:10px;align-items:center;color:var(--rose-deep)}
 .card .more::after{content:"→";transition:transform .3s var(--ease)}
 .card:hover .more::after{transform:translateX(8px)}
+.extras{margin-top:64px;text-align:center}
+.extras h3{font-size:clamp(1.8rem,3.4vw,2.6rem);margin-bottom:26px}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
+.chip{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border:1px solid var(--clay);border-radius:99px;font-family:var(--serif);font-size:1.35rem;text-decoration:none;transition:background .3s,color .3s,transform .35s var(--ease)}
+.chip svg{width:20px;height:16px;color:var(--rose-deep);transition:color .3s}
+.chip:hover{background:var(--ink);color:var(--cream);transform:translateY(-3px)}
+.chip:hover svg{color:var(--rose)}
+.chip small{font-family:var(--sans);font-size:.75rem;letter-spacing:.06em;opacity:.7}
 
 /* ABOUT */
 .about{background:linear-gradient(180deg,var(--cream),var(--sand))}
@@ -159,14 +170,14 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
   .hero-grid,.about-grid{grid-template-columns:1fr}
   .hero h1 .l2{padding-left:.5em}
   .portrait{margin-top:30px}
-  .badge{right:-8px}
-  .card:nth-child(n){grid-column:span 12;min-height:280px}
+  .badge{right:-8px}.orb.o1{left:-14px;width:84px;height:84px}.orb.o2{display:none}
+  .services{grid-template-columns:1fr 1fr}.card:nth-child(n){margin-top:0}.card:nth-child(even){margin-top:36px}
   .steps{grid-template-columns:1fr 1fr;row-gap:36px}
   .creds{grid-template-columns:1fr}
   .about-img{order:-1;max-width:300px}
   .scroll-hint{display:none}
 }
-@media (max-width:520px){.steps{grid-template-columns:1fr}body{font-size:16px}.brand{font-size:1.2rem}.pill{padding:10px 16px}}
+@media (max-width:520px){.services{grid-template-columns:1fr}.card:nth-child(n){margin-top:0}.card{border-radius:160px 160px 26px 26px}.steps{grid-template-columns:1fr}body{font-size:16px}.brand{font-size:1.2rem}.pill{padding:10px 16px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv,.load{opacity:1;transform:none}}
 </style>
 </head>
@@ -217,7 +228,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
     <div class="portrait load" style="--d:.5s">
       <div class="ring r2"></div><div class="ring"></div>
       <div class="arch"><img src="shoghik.jpg" alt="Shoghik Martirosyan, massoterapeuta"></div>
-      <div class="badge"><div><b>+10</b>anos de experiência</div></div>
+      <img class="orb o1" src="img/reflexologia.jpg" alt=""><img class="orb o2" src="img/ayurvedica.jpg" alt=""><div class="badge"><div><b>+10</b>anos de experiência</div></div>
     </div>
   </div>
   <div class="scroll-hint"><span>Role</span><i></i></div>
@@ -225,8 +236,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 
 <div class="marquee" aria-hidden="true">
   <div>
-    <span>Massagem para gestantes</span><span>Reflexologia</span><span>Massagem de mandala</span><span>Massagem de bambu</span>
-    <span>Massagem para gestantes</span><span>Reflexologia</span><span>Massagem de mandala</span><span>Massagem de bambu</span>
+    <span>Gestantes</span><span>Reflexologia</span><span>Mandala</span><span>Bambu</span><span>Tailandesa</span><span>Ayurvédica</span><span>Shiatsu</span><span>Relaxante</span><span>Ventosaterapia</span><span>Drenagem facial</span><span>Quick</span><span>Gestantes</span><span>Reflexologia</span><span>Mandala</span><span>Bambu</span><span>Tailandesa</span><span>Ayurvédica</span><span>Shiatsu</span><span>Relaxante</span><span>Ventosaterapia</span><span>Drenagem facial</span><span>Quick</span>
   </div>
 </div>
 
@@ -234,30 +244,43 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
   <div class="wrap">
     <div class="sec-head">
       <div><p class="eyebrow rv">As terapias</p><h2 class="rv">Cada toque, <em>uma intenção.</em></h2></div>
-      <p class="rv">Quatro caminhos para aliviar tensões, acalmar a mente e reconectar você ao seu ritmo natural.</p>
+      <p class="rv">Onze caminhos para aliviar tensões, acalmar a mente e reconectar você ao seu ritmo natural.</p>
     </div>
     <div class="services">
-      <article class="card rv">
-        <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="50" cy="60" r="30"/><circle cx="50" cy="60" r="20"/><path d="M50 30C40 20 40 10 50 2c10 8 10 18 0 28Z"/></svg>
-        <div><span class="num">01</span><h3>Massagem para <em>gestantes</em></h3><p>Um momento de acolhimento para a mamãe: alivia o peso nas costas, relaxa e cuida de você e do bebê durante a gestação.</p></div>
-        <a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20na%20massagem%20para%20gestantes." target="_blank" rel="noopener">Agendar</a>
+      <article class="card rv" style="--d:0.00s">
+        <div class="ph"><img src="img/gestantes.jpg" alt="Massagem para gestantes" loading="lazy"></div>
+        <div class="txt"><h3>Massagem para <em>gestantes</em></h3><p>Momento de acolhimento para a mamãe: alivia o peso nas costas e relaxa durante a gestação.</p><a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20a%20massagem%20para%20gestantes" target="_blank" rel="noopener">Agendar</a></div>
       </article>
-      <article class="card rv" style="--d:.1s">
-        <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M30 80C20 55 30 25 50 15c20 10 30 40 20 65-10 8-30 8-40 0Z"/><circle cx="35" cy="10" r="4"/><circle cx="46" cy="6" r="4"/><circle cx="58" cy="6" r="4"/><circle cx="69" cy="11" r="4"/></svg>
-        <div><span class="num">02</span><h3><em>Reflexologia</em></h3><p>Estímulo dos pontos dos pés que equilibra o corpo, melhora a circulação e devolve leveza ao dia.</p></div>
-        <a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20reflexologia." target="_blank" rel="noopener">Agendar</a>
+      <article class="card rv" style="--d:0.08s">
+        <div class="ph"><img src="img/reflexologia.jpg" alt="Reflexologia" loading="lazy"></div>
+        <div class="txt"><h3><em>Reflexologia</em></h3><p>Estímulo dos pontos dos pés que equilibra o corpo, melhora a circulação e devolve leveza.</p><a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20reflexologia" target="_blank" rel="noopener">Agendar</a></div>
       </article>
-      <article class="card rv">
-        <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="50" cy="50" r="46"/><circle cx="50" cy="50" r="34"/><circle cx="50" cy="50" r="22"/><circle cx="50" cy="50" r="10"/><path d="M50 4v92M4 50h92M17 17l66 66M83 17 17 83"/></svg>
-        <div><span class="num">03</span><h3>Massagem de <em>mandala</em></h3><p>Feita com discos de madeira que deslizam e pressionam em padrões circulares, para soltar a musculatura profundamente.</p></div>
-        <a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20na%20massagem%20de%20mandala." target="_blank" rel="noopener">Agendar</a>
+      <article class="card rv" style="--d:0.16s">
+        <div class="ph"><img src="img/mandala.jpg" alt="Massagem de mandala" loading="lazy"></div>
+        <div class="txt"><h3>Massagem de <em>mandala</em></h3><p>Discos de madeira deslizam em padrões circulares para soltar a musculatura em profundidade.</p><a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20a%20massagem%20de%20mandala" target="_blank" rel="noopener">Agendar</a></div>
       </article>
-      <article class="card rv" style="--d:.1s">
-        <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="14" y="8" width="14" height="84" rx="7"/><rect x="43" y="8" width="14" height="84" rx="7"/><rect x="72" y="8" width="14" height="84" rx="7"/><path d="M14 30h14M14 62h14M43 22h14M43 50h14M43 76h14M72 34h14M72 66h14"/></svg>
-        <div><span class="num">04</span><h3>Massagem de <em>bambu</em></h3><p>Bastões de bambu aquecidos e rolados sobre o corpo modelam, relaxam e trazem uma sensação de renovação.</p></div>
-        <a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20na%20massagem%20de%20bambu." target="_blank" rel="noopener">Agendar</a>
+      <article class="card rv" style="--d:0.24s">
+        <div class="ph"><img src="img/bambu.jpg" alt="Massagem de bambu" loading="lazy"></div>
+        <div class="txt"><h3>Massagem de <em>bambu</em></h3><p>Bastões de bambu rolados sobre o corpo modelam, relaxam e trazem sensação de renovação.</p><a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20a%20massagem%20de%20bambu" target="_blank" rel="noopener">Agendar</a></div>
+      </article>
+      <article class="card rv" style="--d:0.00s">
+        <div class="ph"><img src="img/tailandesa.jpg" alt="Massagem tailandesa" loading="lazy"></div>
+        <div class="txt"><h3>Massagem <em>tailandesa</em></h3><p>Alongamentos e pressões ritmadas que soltam a musculatura e ampliam a mobilidade.</p><a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20a%20massagem%20tailandesa" target="_blank" rel="noopener">Agendar</a></div>
+      </article>
+      <article class="card rv" style="--d:0.08s">
+        <div class="ph"><img src="img/ayurvedica.jpg" alt="Massagem ayurvédica" loading="lazy"></div>
+        <div class="txt"><h3>Massagem <em>ayurvédica</em></h3><p>Técnica de origem indiana, com movimentos suaves e ritmados para um relaxamento profundo.</p><a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20a%20massagem%20ayurv%C3%A9dica" target="_blank" rel="noopener">Agendar</a></div>
+      </article>
+      <article class="card rv" style="--d:0.16s">
+        <div class="ph"><img src="img/shiatsu.jpg" alt="Massagem shiatsu" loading="lazy"></div>
+        <div class="txt"><h3>Massagem <em>shiatsu</em></h3><p>Pressão com os dedos em pontos do corpo, técnica japonesa que alivia tensões e equilibra.</p><a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20a%20massagem%20shiatsu" target="_blank" rel="noopener">Agendar</a></div>
+      </article>
+      <article class="card rv" style="--d:0.24s">
+        <div class="ph"><img src="img/relaxante.jpg" alt="Massagem relaxante" loading="lazy"></div>
+        <div class="txt"><h3>Massagem <em>relaxante</em></h3><p>Toques suaves e contínuos para desligar a mente e aliviar o estresse do dia a dia.</p><a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20a%20massagem%20relaxante" target="_blank" rel="noopener">Agendar</a></div>
       </article>
     </div>
+    <div class="extras rv"><h3>E também: <em>mais cuidados</em></h3><div class="chips"><a class="chip" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20Ventosaterapia" target="_blank" rel="noopener"><svg viewBox="0 0 120 90"><use href="#lotus"/></svg>Ventosaterapia</a><a class="chip" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20Drenagem%20facial" target="_blank" rel="noopener"><svg viewBox="0 0 120 90"><use href="#lotus"/></svg>Drenagem facial</a><a class="chip" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20Massagem%20Quick" target="_blank" rel="noopener"><svg viewBox="0 0 120 90"><use href="#lotus"/></svg>Massagem Quick</a></div></div>
   </div>
 </section>
 
@@ -275,7 +298,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
       <div class="creds rv">
         <div class="cred"><b>+10</b><span>anos de experiência internacional</span></div>
         <div class="cred"><b>Dra.</b><span>em Física e Neurofísica</span></div>
-        <div class="cred"><b>4</b><span>terapias para cada necessidade</span></div>
+        <div class="cred"><b>11</b><span>terapias para cada necessidade</span></div>
       </div>
     </div>
   </div>
