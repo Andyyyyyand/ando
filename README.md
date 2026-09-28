@@ -52,6 +52,12 @@ O site aceita tanto os nomes do formulário quanto os nomes curtos (`titulo`, `c
 
 Crie um segundo formulário, público, e cole o link no campo `formularioSugestao` do `config.js`. Aparece um botão "Sugerir uma prática" no site. As respostas vão para outra planilha; a organizadora revisa e cadastra as boas no formulário principal.
 
+## Planilha em uso
+
+O site lê esta planilha: https://docs.google.com/spreadsheets/d/1BKKcSiljjIs0mUsYnJ783i5yCSSOxDtP4Izew8MqCTI/edit
+
+Ela precisa estar compartilhada como **Qualquer pessoa com o link → Leitor**. As colunas são: Título da prática, Categoria, Para quem é, Situação, Estratégia (um passo por linha), Materiais, Tempo e Foto (link, opcional).
+
 ## Textos do site
 
 Em `config.js`:

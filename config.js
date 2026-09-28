@@ -3,7 +3,7 @@ window.CONFIG = {
   // Link da planilha de respostas do Google Forms, publicada como CSV
   // (Arquivo > Compartilhar > Publicar na Web > CSV).
   // Enquanto estiver vazio, o site usa o arquivo data/praticas.csv.
-  planilhaCSV: "",
+  planilhaCSV: "https://docs.google.com/spreadsheets/d/1BKKcSiljjIs0mUsYnJ783i5yCSSOxDtP4Izew8MqCTI/gviz/tq?tqx=out:csv",
 
   // Link público de um formulário para outros professores sugerirem práticas (opcional).
   formularioSugestao: "",
