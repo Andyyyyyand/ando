@@ -305,3 +305,16 @@ details li::before {
   0%, 100% { transform: translateY(0); }
   45% { transform: translateY(-5px) rotate(-4deg); }
 }
+
+/* Animações para toque (celular) e ao aparecer na tela */
+@media (prefers-reduced-motion: no-preference) {
+  .onda .letra { animation: onda .6s ease-in-out calc(var(--i) * 35ms); }
+  h1 .letra, main h2 .letra { -webkit-tap-highlight-color: transparent; cursor: default; }
+  .letra.pula { animation: pulo .7s cubic-bezier(.3, 1.6, .5, 1); }
+}
+@keyframes pulo {
+  0% { transform: none; }
+  35% { transform: translateY(-.35em) rotate(-12deg) scale(1.25); color: var(--cor-pulo); }
+  70% { transform: translateY(.04em) rotate(4deg) scale(.95); color: var(--cor-pulo); }
+  100% { transform: none; }
+}

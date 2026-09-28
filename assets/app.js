@@ -109,6 +109,38 @@
     return alvo;
   }
 
+  // Touch-friendly animations: a tapped letter jumps, and titles wave when
+  // they scroll into view or when their card is tapped.
+  const semAnimacao = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function reiniciarClasse(alvo, classe) {
+    alvo.classList.remove(classe);
+    void alvo.offsetWidth;
+    alvo.classList.add(classe);
+  }
+
+  function pularLetra(letra) {
+    if (semAnimacao) return;
+    letra.style.setProperty("--cor-pulo", `var(${PALETA[Math.floor(Math.random() * PALETA.length)]})`);
+    reiniciarClasse(letra, "pula");
+  }
+
+  function ondaNoTitulo(titulo) {
+    if (!semAnimacao && titulo) reiniciarClasse(titulo, "onda");
+  }
+
+  const observadorOnda = "IntersectionObserver" in window ? new IntersectionObserver((entradas) => {
+    entradas.forEach((e) => {
+      if (!e.isIntersecting) return;
+      ondaNoTitulo(e.target);
+      observadorOnda.unobserve(e.target);
+    });
+  }, { threshold: 0.8 }) : null;
+
+  function observarOnda(titulo) {
+    if (observadorOnda && !semAnimacao) observadorOnda.observe(titulo);
+  }
+
   function cartao(p) {
     const passos = p.estrategia.split(/\n+/).map((s) => s.trim()).filter(Boolean);
     return el("article", { class: "card", id: "pratica-" + praticas.indexOf(p), style: `--cor: ${corDa(p.categoria)}` },
@@ -183,6 +215,7 @@
   function renderLista() {
     const itens = praticasEncontradas();
     $("lista").replaceChildren(...itens.map(cartao));
+    $("lista").querySelectorAll(".card h3").forEach(observarOnda);
     $("vazio").hidden = itens.length > 0;
     $("contagem").textContent = itens.length === 1 ? "1 prática" : itens.length + " práticas";
     renderSugestoes(itens);
@@ -294,7 +327,32 @@
     $("insta-em-breve").hidden = false;
   }
 
-  document.querySelectorAll("h1, main h2").forEach(letrasAnimadas);
+  document.querySelectorAll("h1, main h2").forEach((t) => { letrasAnimadas(t); observarOnda(t); });
+
+  // Tap or drag a finger over a letter to make it jump (also works with a click).
+  const letraSob = (e) => {
+    const alvo = document.elementFromPoint(e.clientX, e.clientY);
+    return alvo && alvo.classList.contains("letra") ? alvo : null;
+  };
+  let ultimaLetra = null;
+  document.addEventListener("pointerdown", (e) => {
+    const letra = letraSob(e);
+    if (letra) { pularLetra(letra); ultimaLetra = letra; }
+    const card = e.pointerType !== "mouse" && e.target.closest && e.target.closest(".card");
+    if (card && !letra) ondaNoTitulo(card.querySelector("h3"));
+  });
+  document.addEventListener("pointermove", (e) => {
+    if (e.pointerType === "mouse" || !e.pressure) return;
+    const letra = letraSob(e);
+    if (letra && letra !== ultimaLetra) { pularLetra(letra); ultimaLetra = letra; }
+  });
+  document.addEventListener("animationend", (e) => {
+    if (e.target.classList.contains("pula")) e.target.classList.remove("pula");
+    if (e.animationName === "onda" && e.target.classList.contains("letra")) {
+      const titulo = e.target.closest(".onda");
+      if (titulo && e.target === titulo.querySelector(".letra:last-of-type") ) titulo.classList.remove("onda");
+    }
+  });
   renderAtalhos();
   $("busca").addEventListener("input", renderLista);
   $("busca").addEventListener("focus", () => renderSugestoes(praticasEncontradas()));
