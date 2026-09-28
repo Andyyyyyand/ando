@@ -84,6 +84,22 @@ h1 { font-size: clamp(42px, 8vw, 76px); font-weight: 700; letter-spacing: -.01em
   box-shadow: 4px 4px 0 var(--tinta);
 }
 .search input::placeholder { color: var(--tinta-suave); }
+.btn-buscar {
+  position: absolute; right: 8px; top: 50%; translate: 0 -50%;
+  font: inherit; font-weight: 800; font-size: 16px; cursor: pointer;
+  padding: 9px 18px; border-radius: 999px; border: 0;
+  background: var(--c-coral); color: #fff;
+}
+.resultado-busca {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+  margin: 4px 0 0; font-weight: 800;
+}
+.resultado-busca[hidden] { display: none; }
+.ver-resultados {
+  font: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
+  padding: 6px 14px; border-radius: 999px;
+  border: 2px solid var(--tinta); background: var(--c-sol); color: #243056;
+}
 
 .deco { position: absolute; width: 44px; height: 44px; opacity: .9; animation: flutua 7s ease-in-out infinite; }
 .deco-1 { top: 36px; right: 10%; }
@@ -234,6 +250,8 @@ details li::before {
 
 @media (max-width: 560px) {
   .hero { padding-block: 40px 56px; }
+  .search input { font-size: 16px; padding-right: 100px; }
+  .btn-buscar { padding: 8px 14px; }
   .folha { padding: 26px 18px 22px 40px; }
   .folha::before { left: 26px; }
   .chips { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding: 4px 16px 8px; scrollbar-width: none; }

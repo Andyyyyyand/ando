@@ -21,11 +21,16 @@
       <p class="rabisco">banco de ideias para a sala de aula</p>
       <h1>Práticas <span class="destaque">Inclusivas<svg viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M3 14 C 50 4, 90 18, 140 10 S 230 4, 297 12" fill="none" stroke="var(--c-coral)" stroke-width="6" stroke-linecap="round"/></svg></span></h1>
       <p class="lead">Estratégias simples, testadas em sala, para apoiar crianças com dificuldades de aprendizagem, transtornos de comportamento e deficiências.</p>
-      <div class="search">
+      <form id="form-busca" class="search" role="search">
         <label for="busca" class="sr-only">Buscar prática</label>
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-        <input id="busca" type="search" placeholder="O que está acontecendo? Ex.: não fica sentado" autocomplete="off">
-      </div>
+        <input id="busca" type="search" enterkeyhint="search" placeholder="O que está acontecendo? Ex.: não fica sentado" autocomplete="off">
+        <button type="submit" class="btn-buscar">Buscar</button>
+      </form>
+      <p id="resultado-busca" class="resultado-busca" aria-live="polite" hidden>
+        <span id="resultado-texto"></span>
+        <button type="button" id="ver-resultados" class="ver-resultados">Ver agora ↓</button>
+      </p>
     </div>
   </header>
 

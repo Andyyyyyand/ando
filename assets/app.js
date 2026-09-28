@@ -111,15 +111,60 @@
     }));
   }
 
+  // Common Portuguese words that say nothing about the situation.
+  const PALAVRAS_VAZIAS = new Set(("a o as os um uma uns umas de da do das dos em na no nas nos por para pra com sem que " +
+    "e ou se ele ela eles elas meu minha seu sua nao sim muito mais menos esta estao fica ficam tem ter ser sao " +
+    "aluno aluna alunos crianca criancas filho filha consegue").split(" "));
+
+  // Short word stem so "fica" finds "ficar" and "sentado" finds "sentar".
+  const raiz = (palavra) => palavra.slice(0, Math.max(5, palavra.length - 2));
+
+  // Everyday words teachers use, pointed at words the practices actually contain.
+  const SINONIMOS = {
+    bate: "agress", agride: "agress", agressivo: "agress", briga: "confronto", birra: "crise",
+    grita: "gritos", chora: "choro", foge: "fuga", autista: "autismo", hiperativo: "tdah",
+    agitado: "agitacao", desatento: "atencao", distraido: "atencao", superdotado: "superdotacao",
+    ler: "leitura", escrever: "escrita", conta: "operacoes", contas: "operacoes", numeros: "matematica",
+  };
+
+  function termosDaBusca() {
+    return normalizar($("busca").value)
+      .split(/[^a-z0-9]+/)
+      .filter((w) => (w.length >= 3 || SINONIMOS[w]) && !PALAVRAS_VAZIAS.has(w))
+      .map((w) => raiz(SINONIMOS[w] || w));
+  }
+
+  function pontuacao(p, termos) {
+    const palavras = normalizar(COLUNAS.map((c) => p[c]).join(" ")).split(/[^a-z0-9]+/);
+    return termos.filter((t) => palavras.some((w) => w.startsWith(t))).length;
+  }
+
   function renderLista() {
-    const termo = normalizar($("busca").value.trim());
-    const itens = praticas.filter((p) =>
-      (categoriaAtiva === "Todas" || p.categoria === categoriaAtiva) &&
-      (!termo || normalizar(COLUNAS.map((c) => p[c]).join(" ")).includes(termo))
-    );
+    const termos = termosDaBusca();
+    let itens = praticas.filter((p) => categoriaAtiva === "Todas" || p.categoria === categoriaAtiva);
+    if (termos.length) {
+      itens = itens
+        .map((p) => ({ p, n: pontuacao(p, termos) }))
+        .filter((x) => x.n > 0)
+        .sort((a, b) => b.n - a.n)
+        .map((x) => x.p);
+    }
     $("lista").replaceChildren(...itens.map(cartao));
     $("vazio").hidden = itens.length > 0;
-    $("contagem").textContent = itens.length === 1 ? "1 prática" : itens.length + " práticas";
+    const total = itens.length === 1 ? "1 prática" : itens.length + " práticas";
+    $("contagem").textContent = total;
+
+    const buscando = $("busca").value.trim() !== "";
+    $("resultado-busca").hidden = !buscando;
+    $("resultado-texto").textContent = itens.length
+      ? (itens.length === 1 ? "1 prática encontrada" : itens.length + " práticas encontradas")
+      : "Nenhuma prática encontrada. Tente outras palavras.";
+    $("ver-resultados").hidden = itens.length === 0;
+  }
+
+  function irParaResultados() {
+    $("busca").blur();
+    $("titulo-praticas").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function carregar() {
@@ -165,6 +210,8 @@
     $("link-insta").hidden = false;
   }
   $("busca").addEventListener("input", renderLista);
+  $("form-busca").addEventListener("submit", (e) => { e.preventDefault(); renderLista(); irParaResultados(); });
+  $("ver-resultados").addEventListener("click", irParaResultados);
 
   carregar().then((lista) => { praticas = lista; renderFiltros(); renderLista(); });
 })();
