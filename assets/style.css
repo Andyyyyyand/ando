@@ -285,3 +285,23 @@ details li::before {
   .chip { flex: 0 0 auto; }
 }
 .insta.insta-breve { background: transparent; border: 2px dashed var(--rodape-texto); color: var(--rodape-texto); }
+
+/* Letras animadas ao passar o mouse */
+.palavra { display: inline-block; white-space: nowrap; }
+.letra { display: inline-block; transition: transform .25s cubic-bezier(.3, 1.8, .5, 1), color .2s; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  h1 .letra:hover, main h2 .letra:hover { transform: translateY(-.18em) rotate(-8deg) scale(1.15); }
+  h1 .letra:nth-child(4n+1):hover, main h2 .letra:nth-child(4n+1):hover { color: var(--c-coral); }
+  h1 .letra:nth-child(4n+2):hover, main h2 .letra:nth-child(4n+2):hover { color: var(--c-sol); }
+  h1 .letra:nth-child(4n+3):hover, main h2 .letra:nth-child(4n+3):hover { color: var(--c-ceu); }
+  h1 .letra:nth-child(4n):hover, main h2 .letra:nth-child(4n):hover { color: var(--c-lilas); }
+  h1 .destaque .letra:hover { color: var(--c-menta); }
+
+  .card:hover h3 .letra { animation: onda .5s ease-in-out calc(var(--i) * 28ms); }
+  .card:hover h3 { color: var(--cor); }
+  .card h3 { transition: color .2s; }
+}
+@keyframes onda {
+  0%, 100% { transform: translateY(0); }
+  45% { transform: translateY(-5px) rotate(-4deg); }
+}

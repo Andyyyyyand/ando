@@ -81,12 +81,40 @@
     return n;
   }
 
+  // Wraps each letter in a span so titles can bounce letter by letter on hover.
+  // Words stay unbroken, and screen readers get the plain text via aria-label.
+  function letrasAnimadas(alvo) {
+    if (!alvo || alvo.dataset.animado) return alvo;
+    alvo.dataset.animado = "1";
+    alvo.setAttribute("aria-label", alvo.textContent.trim());
+    let n = 0;
+    const percorrer = (no) => {
+      [...no.childNodes].forEach((filho) => {
+        if (filho.nodeType === Node.TEXT_NODE) {
+          const frag = document.createDocumentFragment();
+          filho.textContent.split(/(\s+)/).forEach((parte) => {
+            if (!parte) return;
+            if (/^\s+$/.test(parte)) { frag.append(parte); return; }
+            const palavra = el("span", { class: "palavra", "aria-hidden": "true" });
+            [...parte].forEach((ch) => palavra.append(el("span", { class: "letra", style: `--i: ${n++}` }, ch)));
+            frag.append(palavra);
+          });
+          filho.replaceWith(frag);
+        } else if (filho.nodeType === Node.ELEMENT_NODE && filho.tagName !== "svg") {
+          percorrer(filho);
+        }
+      });
+    };
+    percorrer(alvo);
+    return alvo;
+  }
+
   function cartao(p) {
     const passos = p.estrategia.split(/\n+/).map((s) => s.trim()).filter(Boolean);
     return el("article", { class: "card", id: "pratica-" + praticas.indexOf(p), style: `--cor: ${corDa(p.categoria)}` },
       p.foto ? el("img", { class: "card-foto", src: p.foto, alt: p.titulo, loading: "lazy" }) : null,
       el("span", { class: "tag" }, p.categoria || "Geral"),
-      el("h3", {}, p.titulo),
+      letrasAnimadas(el("h3", {}, p.titulo)),
       p.publico ? el("p", { class: "publico" }, p.publico) : null,
       p.situacao ? el("p", { class: "situacao" }, el("b", {}, "a situação"), p.situacao) : null,
       el("details", {},
@@ -244,7 +272,7 @@
   if (boasVindas.length) {
     const [saudacao, ...paragrafos] = boasVindas;
     $("boas-vindas-texto").replaceChildren(
-      el("h2", {}, saudacao),
+      letrasAnimadas(el("h2", {}, saudacao)),
       ...paragrafos.map((t) => el("p", {}, t)));
     $("boas-vindas").hidden = false;
   }
@@ -266,6 +294,7 @@
     $("insta-em-breve").hidden = false;
   }
 
+  document.querySelectorAll("h1, main h2").forEach(letrasAnimadas);
   renderAtalhos();
   $("busca").addEventListener("input", renderLista);
   $("busca").addEventListener("focus", () => renderSugestoes(praticasEncontradas()));
