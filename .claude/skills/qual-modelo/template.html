@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Qual Modelo Usar</title>
+<style>
+:root{--bg:#faf9f5;--card:#fff;--ink:#1f1e1d;--mute:#6b6a68;--line:#e6e3da;--accent:#c96442;--ok:#2f7d5b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1b19;--card:#262522;--ink:#f2f0ea;--mute:#a19f98;--line:#3a3833;--accent:#e08a67;--ok:#5fb98f}}
+:root[data-theme="dark"]{--bg:#1c1b19;--card:#262522;--ink:#f2f0ea;--mute:#a19f98;--line:#3a3833;--accent:#e08a67;--ok:#5fb98f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;padding:24px 16px}
+main{max-width:720px;margin:0 auto;display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.eyebrow{color:var(--mute);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+h1{margin:4px 0 0;font-size:34px;color:var(--accent)}
+code{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:14px}
+ul{margin:8px 0 0;padding-left:20px}li{margin:4px 0}
+.scale{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.step{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;font-size:14px;color:var(--mute)}
+.step.on{border-color:var(--accent);color:var(--ink);background:var(--bg);font-weight:600;outline:2px solid var(--accent)}
+.step small{display:block;font-weight:400;color:var(--mute)}
+.ok{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <div class="eyebrow">Projeto: {{PROJETO}}</div>
+    <h1>{{MODELO_PRINCIPAL}}</h1>
+    <p>{{RESUMO_UMA_LINHA}}</p>
+    <p>ID: <code>{{MODELO_ID}}</code> · Trocar: <code>/model</code></p>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Escala</div>
+    <div class="scale">
+      <!-- marque class="step on" no modelo recomendado -->
+      <div class="step">Haiku 4.5<small>rápido · barato</small></div>
+      <div class="step">Sonnet 5.5<small>equilíbrio</small></div>
+      <div class="step">Opus 5.5<small>raciocínio</small></div>
+      <div class="step">Fable 5.1<small>máximo</small></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Por quê</div>
+    <ul><li>{{MOTIVO_1}}</li><li>{{MOTIVO_2}}</li><li>{{MOTIVO_3}}</li></ul>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Quando trocar</div>
+    <p><span class="ok">Subir para {{ALTERNATIVO}}:</span> {{QUANDO_TROCAR}}</p>
+  </div>
+</main>
+</body>
+</html>
