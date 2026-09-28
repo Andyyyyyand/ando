@@ -124,6 +124,22 @@ h1 { font-size: clamp(42px, 8vw, 76px); font-weight: 700; letter-spacing: -.01em
   color: var(--c-coral); text-align: right; margin-top: 16px !important; max-width: none !important;
 }
 
+/* Propósito */
+.proposito { position: relative; margin: 72px auto 0; max-width: 860px; text-align: center; }
+.proposito::before {
+  content: "\201C"; display: block; height: 56px;
+  font-family: "Fredoka", Georgia, serif; font-size: 110px; line-height: 1; color: var(--c-coral);
+}
+.proposito blockquote {
+  margin: 0; font-family: "Fredoka", "Nunito", system-ui, sans-serif; font-weight: 500;
+  font-size: clamp(24px, 3.6vw, 34px); line-height: 1.35; text-wrap: balance;
+}
+.proposito mark {
+  color: inherit; padding: 0 .1em; border-radius: 6px;
+  background: linear-gradient(transparent 45%, color-mix(in srgb, var(--c-sol) 55%, transparent) 45% 92%, transparent 92%);
+}
+.proposito figcaption { margin-top: 12px; font-family: "Caveat", cursive; font-size: 26px; font-weight: 700; color: var(--c-menta); }
+
 /* Lista de práticas */
 .praticas { margin-top: 64px; }
 .praticas-topo { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }

@@ -120,6 +120,13 @@
   }
 
   $("autora").textContent = cfg.nomeAutora || "";
+  if (cfg.proposito) {
+    // Text between *asterisks* gets a highlighter mark.
+    $("proposito-texto").replaceChildren(...cfg.proposito.split("*").map((t, i) => (i % 2 ? el("mark", {}, t) : t)));
+    $("proposito-autora").textContent = "— " + (cfg.nomeAutora || "");
+    $("proposito").hidden = false;
+  }
+
   const boasVindas = cfg.boasVindas || [];
   if (boasVindas.length) {
     const [saudacao, ...paragrafos] = boasVindas;

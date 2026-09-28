@@ -13,6 +13,9 @@ window.CONFIG = {
 
   nomeAutora: "Fabiana Karina",
 
+  // Frase de propósito, em destaque. Trechos entre *asteriscos* ganham marca-texto.
+  proposito: "Meu propósito é encontrar caminhos para que cada criança possa aprender, porque *todos são capazes de aprender* quando encontram o caminho certo!",
+
   // Mensagem de boas-vindas (cada item é um parágrafo).
   boasVindas: [
     "Seja muito bem-vindo a este espaço!",
