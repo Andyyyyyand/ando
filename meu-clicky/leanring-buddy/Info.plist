@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>LSUIElement</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/julianjear/makesomething-mac-app/main/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>/l3d2rw5ZZFRU3AadP/w2Zf8FHfhA6bKv16BQOV5OSk=</string>
+	<key>VoiceTranscriptionProvider</key>
+	<string>apple</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>O agente do Clicky usa isso para criar lembretes, eventos e notas quando você pede.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>O Clicky usa o microfone para você conversar com ele.</string>
+	<key>NSScreenCaptureUsageDescription</key>
+	<string>O Clicky precisa ver sua tela para ajudar você.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>O Clicky transcreve sua voz no próprio Mac quando você fala com ele.</string>
+</dict>
+</plist>
