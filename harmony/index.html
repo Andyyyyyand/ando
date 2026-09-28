@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harmony · Shoghik Martirosyan — Massoterapia</title>
+<meta name="description" content="Massoterapia com mais de 10 anos de experiência internacional. Massagem para gestantes, reflexologia, massagem de mandala e de bambu. Agende pelo WhatsApp.">
+<meta name="theme-color" content="#F6E9DF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FBF4EC; --sand:#F1DFD2; --blush:#E9C9BC; --rose:#DE8FA3; --rose-deep:#C4677F;
+  --clay:#8A5F55; --ink:#3A2826; --ink-soft:#6E5650; --leaf:#8C9A7B;
+  --serif:'Cormorant Garamond',Georgia,serif; --sans:'Jost',system-ui,sans-serif;
+  --ease:cubic-bezier(.22,.8,.24,1);
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-weight:300;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;opacity:.07;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+a{color:inherit}
+.wrap{width:min(1120px,100% - 40px);margin-inline:auto}
+h1,h2,h3{font-family:var(--serif);font-weight:500;line-height:1.02;letter-spacing:-.01em}
+em{font-style:italic;color:var(--rose-deep)}
+.eyebrow{font-size:.74rem;letter-spacing:.34em;text-transform:uppercase;color:var(--clay);display:flex;align-items:center;gap:14px}
+.eyebrow::before{content:"";width:38px;height:1px;background:currentColor}
+
+/* NAV */
+nav{position:fixed;inset:0 0 auto 0;z-index:50;transition:background .4s,box-shadow .4s}
+nav.solid{background:rgba(251,244,236,.86);backdrop-filter:blur(14px);box-shadow:0 1px 0 rgba(138,95,85,.15)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:74px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-family:var(--serif);font-size:1.5rem;letter-spacing:.18em;text-transform:uppercase}
+.brand svg{width:34px;height:34px}
+.nav-links{display:flex;gap:32px;align-items:center;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase}
+.nav-links a{text-decoration:none;position:relative}
+.nav-links a:not(.pill)::after{content:"";position:absolute;left:0;bottom:-4px;height:1px;width:0;background:var(--rose-deep);transition:width .4s var(--ease)}
+.nav-links a:not(.pill):hover::after{width:100%}
+.pill{background:var(--ink);color:var(--cream);padding:11px 22px;border-radius:99px;transition:background .3s,transform .3s var(--ease)}
+.pill:hover{background:var(--rose-deep);transform:translateY(-2px)}
+
+/* HERO */
+.hero{position:relative;overflow-x:clip;min-height:100svh;display:grid;align-items:center;padding:120px 0 80px;
+  background:radial-gradient(60% 55% at 82% 30%,var(--blush) 0,transparent 70%),radial-gradient(45% 45% at 8% 92%,#F3D3D6 0,transparent 70%),var(--cream)}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:60px;align-items:center}
+.hero h1{font-size:clamp(3.4rem,8.4vw,7.6rem);margin:26px 0 28px}
+.hero h1 span{display:block}
+.hero h1 .l2{padding-left:.9em}
+.lead{font-size:1.15rem;max-width:33ch;color:var(--ink-soft)}
+.cta-row{display:flex;flex-wrap:wrap;gap:16px;margin-top:38px}
+.btn{display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-size:.85rem;letter-spacing:.16em;text-transform:uppercase;padding:17px 30px;border-radius:99px;transition:transform .35s var(--ease),background .3s,color .3s,box-shadow .3s}
+.btn.primary{background:var(--rose-deep);color:#fff;box-shadow:0 14px 30px -12px rgba(196,103,127,.7)}
+.btn.primary:hover{transform:translateY(-3px);background:var(--ink)}
+.btn.ghost{border:1px solid var(--clay);color:var(--clay)}
+.btn.ghost:hover{background:var(--clay);color:var(--cream);transform:translateY(-3px)}
+.btn svg{width:18px;height:18px}
+
+.portrait{position:relative;justify-self:center;width:min(340px,78vw);aspect-ratio:4/5.2}
+.arch{position:absolute;inset:0;border-radius:999px 999px 24px 24px;overflow:hidden;box-shadow:0 40px 80px -30px rgba(90,50,45,.5)}
+.arch img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;}
+.arch::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(138,95,85,.35))}
+.ring{position:absolute;inset:-26px;border:1px solid var(--rose);border-radius:999px 999px 40px 40px;opacity:.55;animation:breathe 7s ease-in-out infinite}
+.ring.r2{inset:-52px;opacity:.28;animation-delay:-2.3s}
+@keyframes breathe{50%{transform:scale(1.035);opacity:.9}}
+.badge{position:absolute;right:-34px;bottom:56px;width:128px;height:128px;border-radius:50%;background:var(--cream);display:grid;place-items:center;text-align:center;font-family:var(--serif);font-size:1.05rem;line-height:1.15;padding:18px;box-shadow:0 20px 40px -16px rgba(90,50,45,.45);animation:float 6s ease-in-out infinite}
+.badge b{display:block;font-size:2.4rem;font-weight:500;color:var(--rose-deep);line-height:1}
+@keyframes float{50%{transform:translateY(-12px) rotate(3deg)}}
+.lotus-bg{position:absolute;left:-90px;bottom:-60px;width:420px;opacity:.5;pointer-events:none;animation:sway 14s ease-in-out infinite}
+@keyframes sway{50%{transform:rotate(5deg) translateY(-10px)}}
+.scroll-hint{position:absolute;left:50%;bottom:24px;translate:-50% 0;font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay);display:flex;flex-direction:column;align-items:center;gap:8px}
+.scroll-hint i{width:1px;height:38px;background:linear-gradient(var(--clay),transparent);animation:drip 2.2s infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* MARQUEE */
+.marquee{background:var(--ink);color:var(--sand);overflow:hidden;padding:20px 0;font-family:var(--serif);font-style:italic;font-size:1.6rem;white-space:nowrap}
+.marquee div{display:inline-flex;gap:46px;animation:slide 32s linear infinite;padding-right:46px}
+.marquee span::after{content:"✿";margin-left:46px;color:var(--rose);font-style:normal;font-size:1.1rem}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* SECTIONS */
+section{padding:clamp(80px,12vw,150px) 0}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:40px;flex-wrap:wrap;margin-bottom:64px}
+.sec-head h2{font-size:clamp(2.6rem,6vw,5rem);max-width:12ch;margin-top:20px}
+.sec-head p{max-width:36ch;color:var(--ink-soft)}
+
+/* SERVICES */
+.services{display:grid;grid-template-columns:repeat(12,1fr);gap:22px}
+.card{position:relative;background:var(--sand);border-radius:28px;padding:38px 34px 34px;overflow:hidden;min-height:340px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .5s var(--ease),box-shadow .5s,background .5s}
+.card:nth-child(1){grid-column:span 7;background:var(--blush)}
+.card:nth-child(2){grid-column:span 5}
+.card:nth-child(3){grid-column:span 5;background:#EBD6D0}
+.card:nth-child(4){grid-column:span 7;background:var(--ink);color:var(--cream)}
+.card:hover{transform:translateY(-8px) rotate(-.4deg);box-shadow:0 34px 60px -30px rgba(90,50,45,.55)}
+.card .num{font-family:var(--serif);font-style:italic;font-size:1.1rem;color:var(--rose-deep)}
+.card:nth-child(4) .num{color:var(--rose)}
+.card h3{font-size:clamp(2rem,3.4vw,2.9rem);margin:14px 0 12px}
+.card p{max-width:34ch;font-size:.98rem;opacity:.85}
+.card .glyph{position:absolute;right:-30px;top:-30px;width:210px;height:210px;opacity:.22;transition:transform 1s var(--ease),opacity .5s}
+.card:hover .glyph{transform:rotate(30deg) scale(1.12);opacity:.4}
+.card .more{margin-top:26px;font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;display:inline-flex;gap:10px;align-items:center}
+.card .more::after{content:"→";transition:transform .3s var(--ease)}
+.card:hover .more::after{transform:translateX(8px)}
+
+/* ABOUT */
+.about{background:linear-gradient(180deg,var(--cream),var(--sand))}
+.about-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(40px,8vw,110px);align-items:center}
+.about h2{font-size:clamp(2.6rem,5.6vw,4.8rem);margin:22px 0 28px}
+.about p+p{margin-top:18px}
+.quote{font-family:var(--serif);font-style:italic;font-size:clamp(1.6rem,3vw,2.3rem);line-height:1.2;color:var(--clay);border-left:2px solid var(--rose);padding-left:26px;margin:34px 0}
+.creds{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:40px}
+.cred{border-top:1px solid var(--clay);padding-top:16px}
+.cred b{display:block;font-family:var(--serif);font-weight:500;font-size:2.6rem;line-height:1;color:var(--rose-deep)}
+.cred span{font-size:.82rem;letter-spacing:.06em;color:var(--ink-soft);display:block;margin-top:8px;line-height:1.4}
+.about-img{position:relative;max-width:380px}
+.about-img .blob{width:100%;aspect-ratio:1;border-radius:63% 37% 54% 46%/55% 48% 52% 45%;overflow:hidden;animation:morph 16s ease-in-out infinite;box-shadow:0 40px 80px -34px rgba(90,50,45,.55)}
+.about-img img{width:100%;height:100%;object-fit:cover}
+@keyframes morph{50%{border-radius:40% 60% 38% 62%/58% 40% 60% 42%}}
+.about-img .tag{position:absolute;left:-16px;bottom:34px;background:var(--cream);padding:14px 24px;border-radius:99px;font-family:var(--serif);font-style:italic;font-size:1.25rem;box-shadow:0 16px 34px -16px rgba(90,50,45,.5)}
+
+/* PROCESS */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;counter-reset:s;position:relative}
+.step{padding:30px 28px 10px 0;border-top:1px solid rgba(138,95,85,.4);position:relative}
+.step::before{counter-increment:s;content:"0" counter(s);font-family:var(--serif);font-size:4.4rem;line-height:1;color:var(--blush);display:block;margin-bottom:10px;transition:color .4s}
+.step:hover::before{color:var(--rose)}
+.step::after{content:"";position:absolute;top:-5px;left:0;width:9px;height:9px;border-radius:50%;background:var(--rose-deep)}
+.step h3{font-size:1.7rem;margin-bottom:8px}
+.step p{font-size:.95rem;color:var(--ink-soft)}
+
+/* CONTACT */
+.contact{background:var(--ink);color:var(--cream);position:relative;overflow:hidden;text-align:center}
+.contact .eyebrow{justify-content:center;color:var(--blush)}
+.contact h2{font-size:clamp(3rem,9vw,8rem);margin:24px auto 30px;max-width:11ch}
+.contact h2 em{color:var(--rose)}
+.contact p{max-width:44ch;margin:0 auto;color:var(--sand);opacity:.85}
+.contact .cta-row{justify-content:center;margin-top:44px}
+.contact .btn.ghost{border-color:var(--blush);color:var(--blush)}
+.contact .btn.ghost:hover{background:var(--blush);color:var(--ink)}
+.contact .btn.primary:hover{background:var(--cream);color:var(--ink)}
+.halo{position:absolute;left:50%;top:50%;width:900px;height:900px;translate:-50% -50%;border-radius:50%;border:1px solid rgba(233,201,188,.14);pointer-events:none;animation:breathe 9s ease-in-out infinite}
+.halo.h2{width:640px;height:640px;animation-delay:-3s}
+.halo.h3{width:1180px;height:1180px;animation-delay:-5s}
+footer{background:#2B1D1B;color:var(--blush);padding:34px 0;font-size:.82rem;letter-spacing:.08em}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+.wa-float{position:fixed;right:20px;bottom:20px;z-index:60;width:60px;height:60px;border-radius:50%;background:#25a05a;display:grid;place-items:center;box-shadow:0 14px 30px -8px rgba(0,0,0,.4);transition:transform .3s var(--ease)}
+.wa-float:hover{transform:scale(1.1) rotate(-6deg)}
+.wa-float svg{width:30px;height:30px;fill:#fff}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(34px);transition:opacity 1s var(--ease),transform 1s var(--ease);transition-delay:var(--d,0s)}
+.rv.in{opacity:1;transform:none}
+.load{opacity:0;transform:translateY(26px);animation:up 1.2s var(--ease) forwards;animation-delay:var(--d,0s)}
+@keyframes up{to{opacity:1;transform:none}}
+
+@media (max-width:900px){
+  .nav-links a:not(.pill){display:none}
+  .hero-grid,.about-grid{grid-template-columns:1fr}
+  .hero h1 .l2{padding-left:.5em}
+  .portrait{margin-top:30px}
+  .badge{right:-8px}
+  .card:nth-child(n){grid-column:span 12;min-height:280px}
+  .steps{grid-template-columns:1fr 1fr;row-gap:36px}
+  .creds{grid-template-columns:1fr}
+  .about-img{order:-1;max-width:300px}
+  .scroll-hint{display:none}
+}
+@media (max-width:520px){.steps{grid-template-columns:1fr}body{font-size:16px}.brand{font-size:1.2rem}.pill{padding:10px 16px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv,.load{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="lotus" viewBox="0 0 120 90">
+      <g fill="currentColor">
+        <path d="M60 6C46 22 44 44 60 70 76 44 74 22 60 6Z"/>
+        <path d="M60 72C40 62 26 40 30 18 46 26 60 46 60 72Z" opacity=".8"/>
+        <path d="M60 72C80 62 94 40 90 18 74 26 60 46 60 72Z" opacity=".8"/>
+        <path d="M58 76C36 76 14 62 6 40 26 38 48 52 58 76Z" opacity=".6"/>
+        <path d="M62 76C84 76 106 62 114 40 94 38 72 52 62 76Z" opacity=".6"/>
+      </g>
+    </symbol>
+    <symbol id="wa" viewBox="0 0 32 32"><path d="M16 3a13 13 0 0 0-11 19.8L3 29l6.400-1.700A13 13 0 1 0 16 3Zm0 2.300a10.700 10.700 0 1 1-5.500 19.900l-.4-.2-3.800 1 1-3.700-.3-.4A10.700 10.700 0 0 1 16 5.300Zm-4.200 5.300c-.3 0-.7.100-1 .5-.3.400-1.200 1.200-1.200 2.900s1.200 3.400 1.400 3.600c.2.200 2.400 3.900 6 5.300 3 1.200 3.600.9 4.200.9.700-.1 2.100-.9 2.400-1.700.3-.8.300-1.500.2-1.700-.1-.1-.3-.2-.7-.4l-2.200-1.100c-.3-.1-.6-.2-.8.200l-1 1.200c-.2.200-.4.300-.7.100-.4-.2-1.500-.6-2.800-1.700-1-.9-1.700-2-1.900-2.400-.2-.3 0-.5.100-.7l.5-.6c.2-.2.200-.4.400-.6.100-.3.100-.5 0-.7l-1-2.400c-.3-.6-.5-.6-.8-.6h-.7Z"/></symbol>
+  </defs>
+</svg>
+
+<nav id="nav">
+  <div class="wrap nav-in">
+    <a href="#topo" class="brand"><svg style="color:var(--rose-deep)"><use href="#lotus"/></svg>Harmony</a>
+    <div class="nav-links">
+      <a href="#terapias">Terapias</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#como">Como funciona</a>
+      <a class="pill" href="https://wa.me/5531983436887?text=Ol%C3%A1%2C%20Shoghik!%20Gostaria%20de%20agendar%20uma%20massagem." target="_blank" rel="noopener">Agendar</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="topo">
+  <svg class="lotus-bg" style="color:var(--rose)" viewBox="0 0 120 90"><use href="#lotus"/></svg>
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow load" style="--d:.1s">Massoterapia Terapêutica</p>
+      <h1>
+        <span class="load" style="--d:.25s">O corpo</span>
+        <span class="l2 load" style="--d:.45s">volta a <em>respirar.</em></span>
+      </h1>
+      <p class="lead load" style="--d:.7s">Massagem terapêutica com mais de dez anos de experiência internacional — um tempo só seu, com cuidado, ciência e presença.</p>
+      <div class="cta-row load" style="--d:.9s">
+        <a class="btn primary" href="https://wa.me/5531983436887?text=Ol%C3%A1%2C%20Shoghik!%20Gostaria%20de%20agendar%20uma%20massagem." target="_blank" rel="noopener"><svg fill="currentColor"><use href="#wa"/></svg>Agendar pelo WhatsApp</a>
+        <a class="btn ghost" href="#terapias">Conhecer as terapias</a>
+      </div>
+    </div>
+    <div class="portrait load" style="--d:.5s">
+      <div class="ring r2"></div><div class="ring"></div>
+      <div class="arch"><img src="shoghik.jpg" alt="Shoghik Martirosyan, massoterapeuta"></div>
+      <div class="badge"><div><b>+10</b>anos de experiência</div></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><span>Role</span><i></i></div>
+</header>
+
+<div class="marquee" aria-hidden="true">
+  <div>
+    <span>Massagem para gestantes</span><span>Reflexologia</span><span>Massagem de mandala</span><span>Massagem de bambu</span>
+    <span>Massagem para gestantes</span><span>Reflexologia</span><span>Massagem de mandala</span><span>Massagem de bambu</span>
+  </div>
+</div>
+
+<section id="terapias">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><p class="eyebrow rv">As terapias</p><h2 class="rv">Cada toque, <em>uma intenção.</em></h2></div>
+      <p class="rv">Quatro caminhos para aliviar tensões, acalmar a mente e reconectar você ao seu ritmo natural.</p>
+    </div>
+    <div class="services">
+      <article class="card rv">
+        <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="50" cy="60" r="30"/><circle cx="50" cy="60" r="20"/><path d="M50 30C40 20 40 10 50 2c10 8 10 18 0 28Z"/></svg>
+        <div><span class="num">01</span><h3>Massagem para <em>gestantes</em></h3><p>Um momento de acolhimento para a mamãe: alivia o peso nas costas, relaxa e cuida de você e do bebê durante a gestação.</p></div>
+        <a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20na%20massagem%20para%20gestantes." target="_blank" rel="noopener">Agendar</a>
+      </article>
+      <article class="card rv" style="--d:.1s">
+        <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M30 80C20 55 30 25 50 15c20 10 30 40 20 65-10 8-30 8-40 0Z"/><circle cx="35" cy="10" r="4"/><circle cx="46" cy="6" r="4"/><circle cx="58" cy="6" r="4"/><circle cx="69" cy="11" r="4"/></svg>
+        <div><span class="num">02</span><h3><em>Reflexologia</em></h3><p>Estímulo dos pontos dos pés que equilibra o corpo, melhora a circulação e devolve leveza ao dia.</p></div>
+        <a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20em%20reflexologia." target="_blank" rel="noopener">Agendar</a>
+      </article>
+      <article class="card rv">
+        <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="50" cy="50" r="46"/><circle cx="50" cy="50" r="34"/><circle cx="50" cy="50" r="22"/><circle cx="50" cy="50" r="10"/><path d="M50 4v92M4 50h92M17 17l66 66M83 17 17 83"/></svg>
+        <div><span class="num">03</span><h3>Massagem de <em>mandala</em></h3><p>Feita com discos de madeira que deslizam e pressionam em padrões circulares, para soltar a musculatura profundamente.</p></div>
+        <a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20na%20massagem%20de%20mandala." target="_blank" rel="noopener">Agendar</a>
+      </article>
+      <article class="card rv" style="--d:.1s">
+        <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="14" y="8" width="14" height="84" rx="7"/><rect x="43" y="8" width="14" height="84" rx="7"/><rect x="72" y="8" width="14" height="84" rx="7"/><path d="M14 30h14M14 62h14M43 22h14M43 50h14M43 76h14M72 34h14M72 66h14"/></svg>
+        <div><span class="num">04</span><h3>Massagem de <em>bambu</em></h3><p>Bastões de bambu aquecidos e rolados sobre o corpo modelam, relaxam e trazem uma sensação de renovação.</p></div>
+        <a class="more" href="https://wa.me/5531983436887?text=Ol%C3%A1!%20Tenho%20interesse%20na%20massagem%20de%20bambu." target="_blank" rel="noopener">Agendar</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="sobre">
+  <div class="wrap about-grid">
+    <div class="about-img rv">
+      <div class="blob"><img src="shoghik.jpg" alt="Retrato de Shoghik Martirosyan"></div>
+      <div class="tag">Shoghik Martirosyan</div>
+    </div>
+    <div>
+      <p class="eyebrow rv">Sobre a terapeuta</p>
+      <h2 class="rv">Ciência e <em>sensibilidade</em> nas mãos.</h2>
+      <p class="rv">Shoghik é massoterapeuta com formação internacional e doutorado em Física e Neurofísica. Une o conhecimento sobre o funcionamento do corpo e do sistema nervoso à delicadeza de quem cuida de pessoas.</p>
+      <p class="quote rv">Transformando vidas através da massagem terapêutica.</p>
+      <div class="creds rv">
+        <div class="cred"><b>+10</b><span>anos de experiência internacional</span></div>
+        <div class="cred"><b>Dra.</b><span>em Física e Neurofísica</span></div>
+        <div class="cred"><b>4</b><span>terapias para cada necessidade</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="como">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><p class="eyebrow rv">Como funciona</p><h2 class="rv">Simples como <em>respirar.</em></h2></div>
+      <p class="rv">Do primeiro contato ao relaxamento, tudo pensado para você se sentir acolhida(o) desde o início.</p>
+    </div>
+    <div class="steps">
+      <div class="step rv"><h3>Converse</h3><p>Chame no WhatsApp e conte o que você procura.</p></div>
+      <div class="step rv" style="--d:.1s"><h3>Escolha</h3><p>Juntas, definimos a terapia ideal para o seu momento.</p></div>
+      <div class="step rv" style="--d:.2s"><h3>Agende</h3><p>Combinamos o melhor dia e horário para você.</p></div>
+      <div class="step rv" style="--d:.3s"><h3>Relaxe</h3><p>Desligue do mundo e permita-se ser cuidada(o).</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contato">
+  <div class="halo h3"></div><div class="halo"></div><div class="halo h2"></div>
+  <div class="wrap" style="position:relative">
+    <p class="eyebrow rv">Contato</p>
+    <h2 class="rv">Reserve o seu <em>momento.</em></h2>
+    <p class="rv">Fale diretamente com a Shoghik para tirar dúvidas e agendar seu atendimento.</p>
+    <div class="cta-row rv">
+      <a class="btn primary" href="https://wa.me/5531983436887?text=Ol%C3%A1%2C%20Shoghik!%20Gostaria%20de%20agendar%20uma%20massagem." target="_blank" rel="noopener"><svg fill="currentColor"><use href="#wa"/></svg>WhatsApp</a>
+      <a class="btn ghost" href="tel:+5531983436887">(31) 98343-6887</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap"><span>© <span id="ano">2026</span> Harmony · Shoghik Martirosyan</span><span>Massoterapia · Atendimento com hora marcada</span></div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/5531983436887" target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg viewBox="0 0 32 32"><use href="#wa"/></svg></a>
+
+<script>
+const nav=document.getElementById('nav');
+const onScroll=()=>nav.classList.toggle('solid',scrollY>40);
+onScroll();addEventListener('scroll',onScroll,{passive:true});
+document.getElementById('ano').textContent=new Date().getFullYear();
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
