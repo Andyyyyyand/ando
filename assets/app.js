@@ -83,7 +83,7 @@
 
   function cartao(p) {
     const passos = p.estrategia.split(/\n+/).map((s) => s.trim()).filter(Boolean);
-    return el("article", { class: "card", style: `--cor: ${corDa(p.categoria)}` },
+    return el("article", { class: "card", id: "pratica-" + praticas.indexOf(p), style: `--cor: ${corDa(p.categoria)}` },
       p.foto ? el("img", { class: "card-foto", src: p.foto, alt: p.titulo, loading: "lazy" }) : null,
       el("span", { class: "tag" }, p.categoria || "Geral"),
       el("h3", {}, p.titulo),
@@ -139,7 +139,7 @@
     return termos.filter((t) => palavras.some((w) => w.startsWith(t))).length;
   }
 
-  function renderLista() {
+  function praticasEncontradas() {
     const termos = termosDaBusca();
     let itens = praticas.filter((p) => categoriaAtiva === "Todas" || p.categoria === categoriaAtiva);
     if (termos.length) {
@@ -149,22 +149,76 @@
         .sort((a, b) => b.n - a.n)
         .map((x) => x.p);
     }
+    return itens;
+  }
+
+  function renderLista() {
+    const itens = praticasEncontradas();
     $("lista").replaceChildren(...itens.map(cartao));
     $("vazio").hidden = itens.length > 0;
-    const total = itens.length === 1 ? "1 prática" : itens.length + " práticas";
-    $("contagem").textContent = total;
+    $("contagem").textContent = itens.length === 1 ? "1 prática" : itens.length + " práticas";
+    renderSugestoes(itens);
+  }
 
-    const buscando = $("busca").value.trim() !== "";
-    $("resultado-busca").hidden = !buscando;
-    $("resultado-texto").textContent = itens.length
-      ? (itens.length === 1 ? "1 prática encontrada" : itens.length + " práticas encontradas")
-      : "Nenhuma prática encontrada. Tente outras palavras.";
-    $("ver-resultados").hidden = itens.length === 0;
+  // Live suggestions under the search box while the person types.
+  function renderSugestoes(itens) {
+    const digitado = $("busca").value.trim();
+    const aberto = digitado.length >= 2 && document.activeElement && $("form-busca").parentNode.contains(document.activeElement);
+    $("atalhos").hidden = digitado !== "";
+    if (!aberto) { fecharSugestoes(); return; }
+
+    const linhas = itens.slice(0, 5).map((p) => {
+      const b = el("button", { type: "button", class: "sugestao", role: "option", style: `--cor: ${corDa(p.categoria)}` },
+        el("span", { class: "sugestao-titulo" }, p.titulo),
+        el("span", { class: "sugestao-info" }, p.categoria + (p.situacao ? " · " + p.situacao : "")));
+      b.addEventListener("click", () => abrirPratica(p));
+      return b;
+    });
+    if (itens.length) {
+      const todas = el("button", { type: "button", class: "sugestao-todas" },
+        itens.length === 1 ? "Ver a prática encontrada ↓" : `Ver as ${itens.length} práticas encontradas ↓`);
+      todas.addEventListener("click", irParaResultados);
+      linhas.push(todas);
+    } else {
+      linhas.push(el("p", { class: "sugestao-vazia" }, "Nada encontrado com essas palavras. Tente descrever de outro jeito, ou use um dos atalhos abaixo."));
+      $("atalhos").hidden = false;
+    }
+    $("sugestoes").replaceChildren(...linhas);
+    $("sugestoes").hidden = false;
+    $("busca").setAttribute("aria-expanded", "true");
+  }
+
+  function fecharSugestoes() {
+    $("sugestoes").hidden = true;
+    $("busca").setAttribute("aria-expanded", "false");
   }
 
   function irParaResultados() {
+    fecharSugestoes();
     $("busca").blur();
     $("titulo-praticas").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function abrirPratica(p) {
+    fecharSugestoes();
+    $("busca").blur();
+    const card = $("pratica-" + praticas.indexOf(p));
+    if (!card) return;
+    card.querySelector("details").open = true;
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.classList.remove("destacado");
+    void card.offsetWidth;
+    card.classList.add("destacado");
+  }
+
+  function renderAtalhos() {
+    const atalhos = cfg.atalhosBusca || [];
+    if (!atalhos.length) { $("atalhos").remove(); return; }
+    atalhos.forEach(([rotulo, busca]) => {
+      const b = el("button", { type: "button", class: "atalho" }, rotulo);
+      b.addEventListener("click", () => { $("busca").value = busca; renderLista(); irParaResultados(); });
+      $("atalhos").append(b);
+    });
   }
 
   async function carregar() {
@@ -208,10 +262,28 @@
     $("link-insta").href = cfg.instagram;
     $("link-insta").textContent = "Siga no Instagram";
     $("link-insta").hidden = false;
+  } else {
+    $("insta-em-breve").hidden = false;
   }
+
+  renderAtalhos();
   $("busca").addEventListener("input", renderLista);
+  $("busca").addEventListener("focus", () => renderSugestoes(praticasEncontradas()));
+  $("busca").addEventListener("keydown", (e) => {
+    if (e.key === "Escape") fecharSugestoes();
+    if (e.key === "ArrowDown") { const primeira = $("sugestoes").querySelector("button"); if (primeira) { e.preventDefault(); primeira.focus(); } }
+  });
+  $("sugestoes").addEventListener("keydown", (e) => {
+    const botoes = [...$("sugestoes").querySelectorAll("button")];
+    const i = botoes.indexOf(document.activeElement);
+    if (e.key === "ArrowDown" && i < botoes.length - 1) { e.preventDefault(); botoes[i + 1].focus(); }
+    if (e.key === "ArrowUp") { e.preventDefault(); (i > 0 ? botoes[i - 1] : $("busca")).focus(); }
+    if (e.key === "Escape") { fecharSugestoes(); $("busca").focus(); }
+  });
+  document.addEventListener("pointerdown", (e) => {
+    if (!$("form-busca").parentNode.contains(e.target)) fecharSugestoes();
+  });
   $("form-busca").addEventListener("submit", (e) => { e.preventDefault(); renderLista(); irParaResultados(); });
-  $("ver-resultados").addEventListener("click", irParaResultados);
 
   carregar().then((lista) => { praticas = lista; renderFiltros(); renderLista(); });
 })();

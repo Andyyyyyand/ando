@@ -24,13 +24,13 @@
       <form id="form-busca" class="search" role="search">
         <label for="busca" class="sr-only">Buscar prática</label>
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-        <input id="busca" type="search" enterkeyhint="search" placeholder="O que está acontecendo? Ex.: não fica sentado" autocomplete="off">
+        <input id="busca" type="search" aria-controls="sugestoes" aria-expanded="false" enterkeyhint="search" placeholder="O que está acontecendo? Ex.: não fica sentado" autocomplete="off">
         <button type="submit" class="btn-buscar">Buscar</button>
       </form>
-      <p id="resultado-busca" class="resultado-busca" aria-live="polite" hidden>
-        <span id="resultado-texto"></span>
-        <button type="button" id="ver-resultados" class="ver-resultados">Ver agora ↓</button>
-      </p>
+      <div id="sugestoes" class="sugestoes" role="listbox" aria-label="Práticas sugeridas" hidden></div>
+      <div id="atalhos" class="atalhos">
+        <span class="atalhos-rotulo">Experimente:</span>
+      </div>
     </div>
   </header>
 
@@ -73,6 +73,7 @@
     <div class="wrap footer-inner">
       <p>Práticas Inclusivas · Ensino colaborativo</p>
       <a id="link-insta" class="insta" target="_blank" rel="noopener" hidden>Instagram</a>
+      <span id="insta-em-breve" class="insta insta-breve" hidden>Instagram: em breve!</span>
     </div>
   </footer>
 

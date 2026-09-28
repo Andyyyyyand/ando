@@ -8,8 +8,18 @@ window.CONFIG = {
   // Link público de um formulário para outros professores sugerirem práticas (opcional).
   formularioSugestao: "",
 
-  // Instagram (opcional), ex.: "https://instagram.com/praticasinclusivas"
-  instagram: "https://www.instagram.com/afabianakarina/",
+  // Instagram do projeto. Enquanto estiver vazio, o rodapé mostra "Instagram: em breve!".
+  instagram: "",
+
+  // Atalhos que aparecem embaixo da busca: [texto do botão, palavras buscadas].
+  atalhosBusca: [
+    ["Não fica sentado", "fica sentado"],
+    ["Crises e choro", "crise choro"],
+    ["Dificuldade para ler", "leitura"],
+    ["Agressividade", "agressivo"],
+    ["Não termina a tarefa", "termina"],
+    ["Autismo", "autismo"],
+  ],
 
 
   // Frase de propósito, em destaque. Trechos entre *asteriscos* ganham marca-texto.
