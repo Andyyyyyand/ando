@@ -24,6 +24,18 @@ Ele é baseado no [Clicky de código aberto do Farza](https://github.com/farzaa/
 
 No painel você escolhe **Auto**, **Local** ou **Claude** e vê quem respondeu a última pergunta.
 
+### Atalhos
+| Atalho | O que faz |
+|---|---|
+| Segurar **ctrl + option** | Pergunta sobre a tela; ele responde falando, mostra o texto e aponta |
+| Segurar **ctrl + option + shift** | **Ditado:** o que você fala é digitado no app aberto (corrigido pelo Claude se houver chave) |
+| **ctrl + option** e dizer "agente, …" | Delega uma tarefa em segundo plano |
+
+No modo conversa ele também **abre programas e sites**: "abre o Spotify", "abre o YouTube".
+
+### Integrações (Gmail, Google Agenda, Notion, Linear)
+Conecte uma vez em **[claude.ai/customize/connectors](https://claude.ai/customize/connectors)**, com a mesma conta do Claude Code. O agente passa a usá-las automaticamente: "agente, rascunha um e-mail pro João dizendo que atraso 10 minutos", "agente, o que tenho na agenda amanhã?". E-mails viram **rascunho**, a menos que você diga "envia".
+
 ### Agentes
 Diga **"agente, ..."** segurando Control+Option. Exemplos:
 - "agente, me lembra de ligar pro João amanhã às nove": cria um lembrete na hora, pelo modelo local

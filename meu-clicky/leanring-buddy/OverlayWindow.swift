@@ -313,19 +313,26 @@ struct BlueCursorView: View {
                 && buddyNavigationMode == .followingCursor
                 && !companionManager.spokenResponseBubbleText.isEmpty {
                 Text(companionManager.spokenResponseBubbleText)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundColor(Color.white.opacity(0.95))
                     .multilineTextAlignment(.leading)
-                    .lineSpacing(2)
+                    .lineSpacing(3)
                     .lineLimit(10)
-                    .frame(maxWidth: 320, alignment: .leading)
+                    .frame(maxWidth: 300, alignment: .leading)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 7)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
                     .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(DS.Colors.overlayCursorBlue)
-                            .shadow(color: DS.Colors.overlayCursorBlue.opacity(0.5), radius: 6, x: 0, y: 0)
+                        // Dark glass card with a thin blue edge, so long answers
+                        // stay readable over any background.
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.92))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .stroke(DS.Colors.overlayCursorBlue.opacity(0.55), lineWidth: 1)
+                            )
+                            .shadow(color: Color.black.opacity(0.35), radius: 14, x: 0, y: 6)
+                            .shadow(color: DS.Colors.overlayCursorBlue.opacity(0.25), radius: 8, x: 0, y: 0)
                     )
                     .overlay(
                         GeometryReader { geo in

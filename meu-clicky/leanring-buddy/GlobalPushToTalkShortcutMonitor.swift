@@ -23,6 +23,12 @@ final class GlobalPushToTalkShortcutMonitor: ObservableObject {
     /// waiting for the async dictation state pipeline to catch up.
     @Published private(set) var isShortcutCurrentlyPressed = false
 
+    /// True when Shift was held at any point while the push-to-talk shortcut
+    /// was down (ctrl + option + shift). That switches the interaction to
+    /// dictation: the words are typed into the focused app instead of being
+    /// answered. Kept after release so the transcript handler can read it.
+    private(set) var wasShiftHeldDuringCurrentPress = false
+
     deinit {
         stop()
     }
@@ -115,6 +121,13 @@ final class GlobalPushToTalkShortcutMonitor: ObservableObject {
             modifierFlagsRawValue: event.flags.rawValue,
             wasShortcutPreviouslyPressed: isShortcutCurrentlyPressed
         )
+
+        let isShiftCurrentlyHeld = event.flags.contains(.maskShift)
+        if shortcutTransition == .pressed {
+            wasShiftHeldDuringCurrentPress = isShiftCurrentlyHeld
+        } else if isShortcutCurrentlyPressed && isShiftCurrentlyHeld {
+            wasShiftHeldDuringCurrentPress = true
+        }
 
         switch shortcutTransition {
         case .none:

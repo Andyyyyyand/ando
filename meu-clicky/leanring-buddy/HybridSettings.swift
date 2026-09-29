@@ -50,6 +50,8 @@ final class HybridSettings: ObservableObject {
         static let kokoroVoice = "hybridKokoroVoice"
         static let speechLocaleIdentifier = "hybridSpeechLocaleIdentifier"
         static let agentAllowsTerminalCommands = "hybridAgentAllowsTerminalCommands"
+        static let agentUsesConnectedIntegrations = "hybridAgentUsesConnectedIntegrations"
+        static let dictationCleanupWithClaude = "hybridDictationCleanupWithClaude"
     }
 
     /// Claude models offered in the panel picker. Opus is the most capable;
@@ -108,6 +110,19 @@ final class HybridSettings: ObservableObject {
         didSet { UserDefaults.standard.set(agentAllowsTerminalCommands, forKey: DefaultsKey.agentAllowsTerminalCommands) }
     }
 
+    /// When on (the default), the Claude Code agent may use the accounts
+    /// connected at claude.ai/customize/connectors (Gmail, Google Calendar,
+    /// Notion, Linear...).
+    @Published var agentUsesConnectedIntegrations: Bool {
+        didSet { UserDefaults.standard.set(agentUsesConnectedIntegrations, forKey: DefaultsKey.agentUsesConnectedIntegrations) }
+    }
+
+    /// When on (the default) and a Claude key is saved, dictated text is
+    /// cleaned up (punctuation, capitalization, misheard words) before typing.
+    @Published var dictationCleanupWithClaude: Bool {
+        didSet { UserDefaults.standard.set(dictationCleanupWithClaude, forKey: DefaultsKey.dictationCleanupWithClaude) }
+    }
+
     /// Mirrors whether a Claude API key is saved, so the UI can react
     /// without reading the Keychain on every render.
     @Published private(set) var hasClaudeAPIKey: Bool = false
@@ -122,6 +137,8 @@ final class HybridSettings: ObservableObject {
         kokoroVoice = defaults.string(forKey: DefaultsKey.kokoroVoice) ?? "pf_dora"
         speechLocaleIdentifier = defaults.string(forKey: DefaultsKey.speechLocaleIdentifier) ?? "pt-BR"
         agentAllowsTerminalCommands = defaults.bool(forKey: DefaultsKey.agentAllowsTerminalCommands)
+        agentUsesConnectedIntegrations = defaults.object(forKey: DefaultsKey.agentUsesConnectedIntegrations) as? Bool ?? true
+        dictationCleanupWithClaude = defaults.object(forKey: DefaultsKey.dictationCleanupWithClaude) as? Bool ?? true
         hasClaudeAPIKey = !(KeychainStore.readString(account: KeychainStore.claudeAPIKeyAccount) ?? "").isEmpty
     }
 

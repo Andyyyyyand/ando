@@ -64,6 +64,7 @@ final class ClaudeCodeAgentRunner {
     func runTask(
         taskText: String,
         allowTerminalCommands: Bool,
+        allowConnectedIntegrations: Bool,
         onLogLine: @escaping (String) -> Void
     ) async throws -> String {
         guard let claudeExecutableURL = Self.locateClaudeCodeExecutable() else {
@@ -79,6 +80,23 @@ final class ClaudeCodeAgentRunner {
             allowedTools.append("Bash")
         }
 
+        // Accounts connected at claude.ai/customize/connectors (Gmail,
+        // Google Calendar, Notion, Linear...) show up in Claude Code as MCP
+        // servers. Allow the tools of every connected one.
+        if allowConnectedIntegrations {
+            let connectedIntegrationNames = await Self.connectedIntegrationServerNames(
+                claudeExecutableURL: claudeExecutableURL
+            )
+            if connectedIntegrationNames.isEmpty {
+                onLogLine("ℹ️ Nenhuma integração conectada (conecte em claude.ai/customize/connectors)")
+            } else {
+                onLogLine("🔌 Integrações: " + connectedIntegrationNames.joined(separator: ", "))
+                for integrationName in connectedIntegrationNames {
+                    allowedTools.append("mcp__\(Self.toolPrefixName(forServerName: integrationName))__*")
+                }
+            }
+        }
+
         let agentPrompt = """
         Você é o agente do Clicky, um assistente de voz no Mac do usuário. O usuário pediu por voz:
 
@@ -88,6 +106,8 @@ final class ClaudeCodeAgentRunner {
         - Trabalhe dentro da pasta atual (\(Self.agentWorkingDirectory.path)). Salve ali qualquer arquivo que criar.
         - Não apague nem sobrescreva arquivos fora dessa pasta.
         - Se precisar de algo que suas ferramentas não permitem, explique no resumo final o que faltou.
+        - Você pode usar as integrações conectadas (Gmail, Google Agenda, Notion, Linear e outras) quando o pedido envolver essas contas.
+        - E-mails: crie um RASCUNHO, a menos que o usuário tenha dito explicitamente para enviar. Nunca apague e-mails, eventos ou páginas.
         - Termine com um resumo curto, em português do Brasil, de uma ou duas frases, escrito para ser falado em voz alta: sem markdown, sem listas, sem links.
         """
 
@@ -102,11 +122,7 @@ final class ClaudeCodeAgentRunner {
         ]
         agentProcess.currentDirectoryURL = Self.agentWorkingDirectory
 
-        var environment = ProcessInfo.processInfo.environment
-        let homeDirectoryPath = FileManager.default.homeDirectoryForCurrentUser.path
-        let extraPathEntries = ["\(homeDirectoryPath)/.local/bin", "/opt/homebrew/bin", "/usr/local/bin"]
-        environment["PATH"] = (extraPathEntries + [environment["PATH"] ?? "/usr/bin:/bin"]).joined(separator: ":")
-        agentProcess.environment = environment
+        agentProcess.environment = Self.makeAgentProcessEnvironment()
 
         let standardOutputPipe = Pipe()
         let standardErrorPipe = Pipe()
@@ -178,6 +194,73 @@ final class ClaudeCodeAgentRunner {
 
     func cancel() {
         runningProcess?.terminate()
+    }
+
+    /// GUI apps don't inherit the shell PATH; add the usual install folders.
+    private static func makeAgentProcessEnvironment() -> [String: String] {
+        var environment = ProcessInfo.processInfo.environment
+        let homeDirectoryPath = FileManager.default.homeDirectoryForCurrentUser.path
+        let extraPathEntries = ["\(homeDirectoryPath)/.local/bin", "/opt/homebrew/bin", "/usr/local/bin"]
+        environment["PATH"] = (extraPathEntries + [environment["PATH"] ?? "/usr/bin:/bin"]).joined(separator: ":")
+        return environment
+    }
+
+    /// Asks `claude mcp list` which MCP servers are connected. Lines look like
+    /// `claude.ai Gmail: https://… - ✓ Connected`. Returns the server names.
+    private static func connectedIntegrationServerNames(claudeExecutableURL: URL) async -> [String] {
+        let listProcess = Process()
+        listProcess.executableURL = claudeExecutableURL
+        listProcess.arguments = ["mcp", "list"]
+        listProcess.environment = makeAgentProcessEnvironment()
+        listProcess.standardInput = FileHandle.nullDevice
+        let outputPipe = Pipe()
+        listProcess.standardOutput = outputPipe
+        listProcess.standardError = Pipe()
+
+        do {
+            try listProcess.run()
+        } catch {
+            return []
+        }
+
+        // Health checks can hang on a broken server; don't wait forever.
+        let timeoutTask = Task {
+            try? await Task.sleep(nanoseconds: 25_000_000_000)
+            if listProcess.isRunning {
+                listProcess.terminate()
+            }
+        }
+        defer { timeoutTask.cancel() }
+
+        var connectedServerNames: [String] = []
+        do {
+            for try await outputLine in outputPipe.fileHandleForReading.bytes.lines {
+                guard outputLine.contains("✓") || outputLine.localizedCaseInsensitiveContains("connected"),
+                      !outputLine.localizedCaseInsensitiveContains("not connected"),
+                      !outputLine.localizedCaseInsensitiveContains("failed"),
+                      let nameSeparatorRange = outputLine.range(of: ": ") else {
+                    continue
+                }
+                let serverName = String(outputLine[..<nameSeparatorRange.lowerBound])
+                    .trimmingCharacters(in: .whitespaces)
+                if !serverName.isEmpty {
+                    connectedServerNames.append(serverName)
+                }
+            }
+        } catch {
+            return connectedServerNames
+        }
+        return connectedServerNames
+    }
+
+    /// Claude Code turns a server name like "claude.ai Gmail" into the tool
+    /// prefix "claude_ai_Gmail" (anything but letters, digits, "_" and "-"
+    /// becomes "_").
+    private static func toolPrefixName(forServerName serverName: String) -> String {
+        String(serverName.map { character -> Character in
+            let isAllowedCharacter = character.isASCII && (character.isLetter || character.isNumber || character == "_" || character == "-")
+            return isAllowedCharacter ? character : "_"
+        })
     }
 
     private static func shortToolInputDescription(_ toolInput: Any?) -> String {

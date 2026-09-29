@@ -129,13 +129,15 @@ final class AgentCoordinator: ObservableObject {
     private func runAgentTask(taskID: UUID, taskText: String) async {
         appendLog(taskID, "🎙️ Pedido: \(taskText)")
 
-        // Step 1: try to handle it as an instant Mac action with the local model.
-        if await localVisionModelClient.isServerReachable() {
+        // Step 1: try to handle it as an instant Mac action. Claude understands
+        // the request best when a key is saved; otherwise the local model.
+        var quickActionClassifierIsAvailable = HybridSettings.shared.hasClaudeAPIKey
+        if !quickActionClassifierIsAvailable {
+            quickActionClassifierIsAvailable = await localVisionModelClient.isServerReachable()
+        }
+        if quickActionClassifierIsAvailable {
             do {
-                let actionJSON = try await localVisionModelClient.completeJSON(
-                    systemPrompt: Self.quickActionClassifierPrompt(),
-                    userPrompt: taskText
-                )
+                let actionJSON = try await classifyQuickAction(taskText: taskText)
                 let actionName = actionJSON["action"] as? String ?? "heavy"
                 if actionName != "heavy" {
                     updateTask(taskID) { $0.kind = .quickMacAction }
@@ -152,7 +154,7 @@ final class AgentCoordinator: ObservableObject {
                 appendLog(taskID, "⚠️ Ação rápida falhou: \(error.localizedDescription)")
             }
         } else {
-            appendLog(taskID, "ℹ️ Modelo local indisponível, usando Claude Code")
+            appendLog(taskID, "ℹ️ Sem modelo para ações rápidas, usando Claude Code")
         }
 
         // Step 2: heavy task via Claude Code.
@@ -169,6 +171,7 @@ final class AgentCoordinator: ObservableObject {
             let resultSummary = try await claudeCodeRunner.runTask(
                 taskText: taskText,
                 allowTerminalCommands: HybridSettings.shared.agentAllowsTerminalCommands,
+                allowConnectedIntegrations: HybridSettings.shared.agentUsesConnectedIntegrations,
                 onLogLine: { [weak self] logLine in
                     self?.appendLog(taskID, logLine)
                 }
@@ -216,6 +219,8 @@ final class AgentCoordinator: ObservableObject {
             try MacQuickActions.openApplication(named: stringValue("name"))
         case "open_url":
             try MacQuickActions.openURL(stringValue("url"))
+        case "open_path":
+            try MacQuickActions.openPath(stringValue("path"))
         case "web_search":
             try MacQuickActions.searchTheWeb(query: stringValue("query"))
         default:
@@ -224,6 +229,38 @@ final class AgentCoordinator: ObservableObject {
     }
 
     // MARK: - Prompt + parsing
+
+    private lazy var quickActionClaudeAPI = ClaudeAPI(model: HybridSettings.shared.claudeModel)
+
+    /// Turns the spoken request into one quick-action JSON object, using
+    /// Claude when a key is saved (smarter) and the local model otherwise.
+    private func classifyQuickAction(taskText: String) async throws -> [String: Any] {
+        if HybridSettings.shared.hasClaudeAPIKey {
+            quickActionClaudeAPI.model = HybridSettings.shared.claudeModel
+            let responseText = try await quickActionClaudeAPI.analyzeImage(
+                images: [],
+                systemPrompt: Self.quickActionClassifierPrompt(),
+                userPrompt: taskText
+            ).text
+            return try Self.parseJSONObject(from: responseText)
+        }
+        return try await localVisionModelClient.completeJSON(
+            systemPrompt: Self.quickActionClassifierPrompt(),
+            userPrompt: taskText
+        )
+    }
+
+    /// Extracts the outermost {...} from a model reply and parses it.
+    private static func parseJSONObject(from responseText: String) throws -> [String: Any] {
+        guard let openingBraceIndex = responseText.firstIndex(of: "{"),
+              let closingBraceIndex = responseText.lastIndex(of: "}"),
+              openingBraceIndex < closingBraceIndex,
+              let jsonData = String(responseText[openingBraceIndex...closingBraceIndex]).data(using: .utf8),
+              let jsonObject = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
+            throw MacQuickActionError.invalidParameters("Resposta sem JSON: \(responseText)")
+        }
+        return jsonObject
+    }
 
     private static func quickActionClassifierPrompt() -> String {
         let currentDateFormatter = DateFormatter()
@@ -241,10 +278,11 @@ final class AgentCoordinator: ObservableObject {
         {"action":"create_note","title":"...","body":"...","confirmation":"..."}
         {"action":"open_app","name":"nome exato do app no macOS","confirmation":"..."}
         {"action":"open_url","url":"...","confirmation":"..."}
+        {"action":"open_path","path":"caminho de pasta ou arquivo, pode começar com ~ (ex.: ~/Downloads)","confirmation":"..."}
         {"action":"web_search","query":"...","confirmation":"..."}
         {"action":"heavy"}
 
-        Use "heavy" para qualquer coisa que exija pesquisar e resumir informações, escrever textos longos, organizar várias notas ou arquivos, criar programas ou apps, ou mais de uma etapa. Na dúvida, use "heavy".
+        Use "heavy" para qualquer coisa que exija pesquisar e resumir informações, escrever textos longos, organizar várias notas ou arquivos, criar programas ou apps, ou mais de uma etapa. Use "heavy" também para tudo que envolva Gmail/e-mail, Google Agenda/Calendar, Notion ou Linear. Na dúvida, use "heavy".
         A confirmação deve ser em português do Brasil, minúsculas, curta e natural, por exemplo "pronto, criei o lembrete para amanhã às nove".
         """
     }

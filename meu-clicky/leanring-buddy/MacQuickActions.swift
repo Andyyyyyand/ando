@@ -96,6 +96,15 @@ enum MacQuickActions {
         NSWorkspace.shared.open(url)
     }
 
+    /// Opens a folder in Finder or a file in its default app. Accepts "~".
+    static func openPath(_ pathText: String) throws {
+        let expandedPath = (pathText.trimmingCharacters(in: .whitespacesAndNewlines) as NSString).expandingTildeInPath
+        guard !expandedPath.isEmpty, FileManager.default.fileExists(atPath: expandedPath) else {
+            throw MacQuickActionError.invalidParameters("Não encontrei: \(pathText)")
+        }
+        NSWorkspace.shared.open(URL(fileURLWithPath: expandedPath))
+    }
+
     static func searchTheWeb(query: String) throws {
         var searchURLComponents = URLComponents(string: "https://www.google.com/search")!
         searchURLComponents.queryItems = [URLQueryItem(name: "q", value: query)]

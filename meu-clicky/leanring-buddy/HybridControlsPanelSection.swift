@@ -24,6 +24,8 @@ struct HybridControlsPanelSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            shortcutsCard
+
             brainModeRow
 
             if hybridSettings.brainMode != .localOnly {
@@ -48,6 +50,63 @@ struct HybridControlsPanelSection: View {
         }
         .onAppear {
             refreshServiceStatus()
+        }
+    }
+
+    // MARK: - Shortcuts
+
+    /// The three ways to use Clicky, shown as key capsules like the
+    /// original app's onboarding.
+    private var shortcutsCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            shortcutRow(keyLabels: ["ctrl", "option"], description: "Perguntar sobre a tela")
+            shortcutRow(keyLabels: ["ctrl", "option", "shift"], description: "Ditar texto no app aberto")
+            shortcutRow(keyLabels: ["ctrl", "option"], description: "Diga \"agente, …\" para delegar")
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: DS.CornerRadius.medium, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [DS.Colors.overlayCursorBlue.opacity(0.16), Color.white.opacity(0.03)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.CornerRadius.medium, style: .continuous)
+                .stroke(DS.Colors.overlayCursorBlue.opacity(0.25), lineWidth: 0.5)
+        )
+    }
+
+    private func shortcutRow(keyLabels: [String], description: String) -> some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 3) {
+                ForEach(keyLabels, id: \.self) { keyLabel in
+                    Text(keyLabel)
+                        .font(.system(size: 10, weight: .semibold, design: .rounded))
+                        .foregroundColor(DS.Colors.textPrimary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(
+                            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                .fill(Color.white.opacity(0.12))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                        )
+                }
+            }
+            .frame(width: 138, alignment: .leading)
+
+            Text(description)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(DS.Colors.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
         }
     }
 
@@ -300,17 +359,15 @@ struct HybridControlsPanelSection: View {
                 }
             }
 
-            // Agent options
-            HStack {
-                Text("Agente pode usar o Terminal")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(DS.Colors.textSecondary)
-                Spacer()
-                Toggle("", isOn: $hybridSettings.agentAllowsTerminalCommands)
-                    .toggleStyle(.switch)
-                    .labelsHidden()
-                    .tint(DS.Colors.accent)
-                    .scaleEffect(0.8)
+            // Dictation + agent options
+            settingsToggleRow(title: "Ditado: corrigir com Claude", isOn: $hybridSettings.dictationCleanupWithClaude)
+            settingsToggleRow(title: "Agente usa Gmail, Agenda, Notion…", isOn: $hybridSettings.agentUsesConnectedIntegrations)
+            settingsToggleRow(title: "Agente pode usar o Terminal", isOn: $hybridSettings.agentAllowsTerminalCommands)
+
+            smallActionButton(label: "Conectar Gmail, Agenda, Notion, Linear") {
+                if let connectorsURL = URL(string: "https://claude.ai/customize/connectors") {
+                    NSWorkspace.shared.open(connectorsURL)
+                }
             }
 
             smallActionButton(label: "Abrir pasta do agente") {
@@ -352,6 +409,20 @@ struct HybridControlsPanelSection: View {
     }
 
     // MARK: - Small building blocks
+
+    private func settingsToggleRow(title: String, isOn: Binding<Bool>) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(DS.Colors.textSecondary)
+            Spacer()
+            Toggle("", isOn: isOn)
+                .toggleStyle(.switch)
+                .labelsHidden()
+                .tint(DS.Colors.accent)
+                .scaleEffect(0.8)
+        }
+    }
 
     private func statusDot(isOnline: Bool?) -> some View {
         Circle()

@@ -546,7 +546,11 @@ final class CompanionManager: ObservableObject {
                         self?.lastTranscript = finalTranscript
                         print("🗣️ Companion received transcript: \(finalTranscript)")
                         ClickyAnalytics.trackUserMessageSent(transcript: finalTranscript)
-                        self?.handleFinalTranscript(finalTranscript)
+                        guard let self else { return }
+                        // ctrl + option + shift = dictation (type the words),
+                        // ctrl + option = talk (answer the question).
+                        let isDictation = self.globalPushToTalkShortcutMonitor.wasShiftHeldDuringCurrentPress
+                        self.handleFinalTranscript(finalTranscript, isDictation: isDictation)
                     }
                 )
             }
@@ -598,6 +602,9 @@ final class CompanionManager: ObservableObject {
 
     if pointing wouldn't help, append [POINT:none].
 
+    opening things:
+    you can open apps and web pages on the user's mac. when the user asks you to open, launch or go to something, add [OPEN_APP:exact macos app name] (e.g. [OPEN_APP:Spotify], [OPEN_APP:System Settings]) or [OPEN_URL:full url] (e.g. [OPEN_URL:https://youtube.com]). put these action tags right after your spoken text and BEFORE the pointing tag, and confirm briefly out loud, like "abrindo o spotify". never read the tags aloud.
+
     examples:
     - user asks how to color grade in final cut and the list has "[12] button "Color Inspector"": "abre o inspetor de cor, ele fica ali no canto de cima da barra de ferramentas. clica nele e aparecem as rodas de cor e as curvas. [ELEMENT:12:inspetor de cor]"
     - user asks what html is: "html é a linguagem de marcação de hipertexto, é basicamente o esqueleto de toda página web. dá uma olhada em como ela se conecta com o css que você está vendo. [POINT:none]"
@@ -615,6 +622,8 @@ final class CompanionManager: ObservableObject {
         - [ELEMENT:n:label] if the thing to click is in the numbered list of clickable elements (n is its number).
         - [POINT:x,y:label] with screenshot pixel coordinates if it is not in the list.
         - [POINT:none] if pointing doesn't help.
+
+        to open an app or website the user asks for, add [OPEN_APP:exact macos app name] or [OPEN_URL:full url] before the pointing tag.
         """
         if canEscalateToClaude {
             localPrompt += """
@@ -630,7 +639,12 @@ final class CompanionManager: ObservableObject {
 
     /// Agent requests ("agente, ...") go to the background agent; everything
     /// else is answered right away by the hybrid brain.
-    private func handleFinalTranscript(_ transcript: String) {
+    private func handleFinalTranscript(_ transcript: String, isDictation: Bool) {
+        if isDictation {
+            insertDictatedText(transcript)
+            return
+        }
+
         if let agentTaskText = AgentCoordinator.extractAgentTaskText(from: transcript) {
             currentResponseTask?.cancel()
             currentResponseTask = nil
@@ -642,6 +656,104 @@ final class CompanionManager: ObservableObject {
         }
 
         sendTranscriptToClaudeWithScreenshot(transcript: transcript)
+    }
+
+    // MARK: - Dictation
+
+    private static let dictationCleanupSystemPrompt = """
+    você recebe a transcrição automática de um texto ditado por voz. devolva o texto pronto para ser digitado:
+    - corrija pontuação, letras maiúsculas e palavras claramente mal reconhecidas.
+    - aplique comandos falados como "vírgula", "ponto", "nova linha", "novo parágrafo", "ponto de interrogação".
+    - não mude o sentido, não resuma, não acrescente nada, não responda perguntas contidas no texto.
+    - mantenha o idioma original.
+    responda SOMENTE com o texto final, sem aspas e sem comentários.
+    """
+
+    /// Dictation mode: types the spoken words into the focused app instead
+    /// of answering them. With a Claude key, the transcript is cleaned up
+    /// first (punctuation, spoken commands, misheard words).
+    private func insertDictatedText(_ transcript: String) {
+        currentResponseTask?.cancel()
+        localSpeechOutput.stopPlayback()
+
+        currentResponseTask = Task {
+            voiceState = .processing
+            var textToInsert = transcript
+
+            let settings = HybridSettings.shared
+            if settings.hasClaudeAPIKey && settings.dictationCleanupWithClaude {
+                do {
+                    claudeAPI.model = settings.claudeModel
+                    let cleanedText = try await claudeAPI.analyzeImage(
+                        images: [],
+                        systemPrompt: Self.dictationCleanupSystemPrompt,
+                        userPrompt: transcript
+                    ).text.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !cleanedText.isEmpty {
+                        textToInsert = cleanedText
+                    }
+                } catch {
+                    // Typing the raw transcript beats typing nothing.
+                    print("⚠️ Dictation cleanup failed, inserting raw transcript: \(error.localizedDescription)")
+                }
+            }
+
+            guard !Task.isCancelled else { return }
+            DictationTextInserter.insertTextIntoFocusedApp(textToInsert)
+            voiceState = .idle
+            scheduleTransientHideIfNeeded()
+        }
+    }
+
+    // MARK: - Open-app / open-link actions
+
+    enum SpokenAnswerAction {
+        case openApplication(applicationName: String)
+        case openURL(urlString: String)
+    }
+
+    /// Pulls [OPEN_APP:name] and [OPEN_URL:url] tags out of an answer. They
+    /// let the talk-mode brain open programs and pages on request.
+    static func extractSpokenAnswerActions(from responseText: String) -> (textWithoutActions: String, actions: [SpokenAnswerAction]) {
+        let pattern = #"\[(OPEN_APP|OPEN_URL):\s*([^\]]+?)\s*\]"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+            return (responseText, [])
+        }
+
+        let fullRange = NSRange(responseText.startIndex..., in: responseText)
+        var actions: [SpokenAnswerAction] = []
+        for match in regex.matches(in: responseText, range: fullRange) {
+            guard let kindRange = Range(match.range(at: 1), in: responseText),
+                  let valueRange = Range(match.range(at: 2), in: responseText) else { continue }
+            let actionValue = String(responseText[valueRange])
+            if responseText[kindRange] == "OPEN_APP" {
+                actions.append(.openApplication(applicationName: actionValue))
+            } else {
+                actions.append(.openURL(urlString: actionValue))
+            }
+        }
+
+        let textWithoutActions = regex
+            .stringByReplacingMatches(in: responseText, range: fullRange, withTemplate: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return (textWithoutActions, actions)
+    }
+
+    private func performSpokenAnswerActions(_ actions: [SpokenAnswerAction]) {
+        for action in actions {
+            do {
+                switch action {
+                case .openApplication(let applicationName):
+                    try MacQuickActions.openApplication(named: applicationName)
+                    print("🚀 Opened app: \(applicationName)")
+                case .openURL(let urlString):
+                    try MacQuickActions.openURL(urlString)
+                    print("🚀 Opened URL: \(urlString)")
+                }
+            } catch {
+                print("⚠️ Could not perform action: \(error.localizedDescription)")
+            }
+        }
     }
 
     /// Speaks an agent update without talking over an answer that is being
@@ -812,8 +924,11 @@ final class CompanionManager: ObservableObject {
                 localSpeechOutput.enqueueSentence(remainingSpeakableText)
                 localSpeechOutput.finishSentenceQueue()
 
-                // Parse the [ELEMENT:n] tag first, then the [POINT:...] tag
-                let elementParseResult = Self.parseAccessibilityElementTag(from: fullResponseText)
+                // Open any apps/links the answer asked for, then parse the
+                // [ELEMENT:n] tag, then the [POINT:...] tag.
+                let actionParseResult = Self.extractSpokenAnswerActions(from: fullResponseText)
+                performSpokenAnswerActions(actionParseResult.actions)
+                let elementParseResult = Self.parseAccessibilityElementTag(from: actionParseResult.textWithoutActions)
                 let parseResult = Self.parsePointingCoordinates(from: elementParseResult.textWithoutElementTag)
                 let spokenText = parseResult.spokenText
 

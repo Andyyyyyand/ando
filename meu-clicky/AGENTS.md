@@ -92,6 +92,7 @@ Worker vars: `ELEVENLABS_VOICE_ID`
 | `AgentCoordinator.swift` | ~315 | "agente, ..." trigger, quick-action classification, task list, spoken/notification results. |
 | `MacQuickActions.swift` | ~150 | Reminders, Calendar, Notes (AppleScript), open app/URL, web search. |
 | `ClaudeCodeAgentRunner.swift` | ~195 | Runs `claude -p` with stream-json in `~/ClickyAgente` and streams its progress. |
+| `DictationTextInserter.swift` | ~70 | Dictation mode (ctrl+option+shift): pastes text into the focused app and restores the clipboard. |
 | `HybridControlsPanelSection.swift` | ~420 | Panel UI: brain mode, Claude model, API key, service status, voice, agent tasks. |
 | `worker/src/index.ts` | ~142 | Cloudflare Worker proxy. Three routes: `/chat` (Claude), `/tts` (ElevenLabs), `/transcribe-token` (AssemblyAI temp token). |
 
