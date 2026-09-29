@@ -1008,7 +1008,11 @@ final class CompanionManager: ObservableObject {
                 localSpeechOutput.startSentenceQueue(onFirstSentenceStartedPlaying: { [weak self] in
                     print("⏱️ Voice started \(String(format: "%.1f", Date().timeIntervalSince(answerPipelineStartedAt)))s after the question")
                     // The spinner gives way to the triangle once audio starts.
-                    self?.voiceState = .responding
+                    // A short answer can finish (and go idle) before its voice
+                    // starts; switching back to .responding then would leave
+                    // Clicky stuck, and "ei Clicky" only listens when idle.
+                    guard let self, self.voiceState == .processing else { return }
+                    self.voiceState = .responding
                 })
 
                 let fullResponseText = try await answerWithHybridBrain(
