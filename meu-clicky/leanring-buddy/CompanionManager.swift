@@ -89,6 +89,9 @@ final class CompanionManager: ObservableObject {
         )
     }()
 
+    /// Hands-free "ei Clicky" listener.
+    private let wakeWordListener = WakeWordListener()
+
     /// Which brain answered the most recent question, shown in the panel.
     @Published private(set) var lastAnsweringBrainDescription: String?
 
@@ -163,6 +166,7 @@ final class CompanionManager: ObservableObject {
         bindVoiceStateObservation()
         bindAudioPowerLevel()
         bindShortcutTransitions()
+        configureWakeWordListener()
         // Eagerly touch the Claude API so its TLS warmup handshake completes
         // well before the onboarding demo fires at ~40s into the video.
         if HybridSettings.shared.hasClaudeAPIKey {
@@ -304,6 +308,7 @@ final class CompanionManager: ObservableObject {
     }
 
     func stop() {
+        wakeWordListener.stopEverything()
         globalPushToTalkShortcutMonitor.stop()
         buddyDictationManager.cancelCurrentDictation()
         overlayWindowManager.hideOverlay()
@@ -656,6 +661,58 @@ final class CompanionManager: ObservableObject {
         }
 
         sendTranscriptToClaudeWithScreenshot(transcript: transcript)
+    }
+
+    // MARK: - Wake word ("ei Clicky")
+
+    private func configureWakeWordListener() {
+        wakeWordListener.shouldBeListening = { [weak self] in
+            guard let self else { return false }
+            guard HybridSettings.shared.wakeWordEnabled,
+                  self.hasCompletedOnboarding,
+                  self.allPermissionsGranted,
+                  !self.buddyDictationManager.isDictationInProgress else {
+                return false
+            }
+            // Keep listening while a command is being captured; otherwise
+            // only when Clicky is quiet, so it never hears its own voice.
+            if self.wakeWordListener.isCapturingCommand {
+                return true
+            }
+            return self.voiceState == .idle && !self.localSpeechOutput.isPlaying
+        }
+
+        wakeWordListener.onWakePhraseDetected = { [weak self] in
+            guard let self else { return }
+            self.transientHideTask?.cancel()
+            self.transientHideTask = nil
+            if !self.isClickyCursorEnabled && !self.isOverlayVisible {
+                self.overlayWindowManager.hasShownOverlayBefore = true
+                self.overlayWindowManager.showOverlay(onScreens: NSScreen.screens, companionManager: self)
+                self.isOverlayVisible = true
+            }
+            self.currentResponseTask?.cancel()
+            self.localSpeechOutput.stopPlayback()
+            self.clearDetectedElementLocation()
+            self.hideSpokenResponseBubble()
+            // Shows the waveform cursor while the command is spoken.
+            self.voiceState = .listening
+        }
+
+        wakeWordListener.onCommandCaptured = { [weak self] commandText in
+            guard let self else { return }
+            self.voiceState = .idle
+            self.lastTranscript = commandText
+            self.handleFinalTranscript(commandText, isDictation: false)
+        }
+
+        wakeWordListener.onCommandCaptureAbandoned = { [weak self] in
+            guard let self else { return }
+            self.voiceState = .idle
+            self.scheduleTransientHideIfNeeded()
+        }
+
+        wakeWordListener.startSupervising()
     }
 
     // MARK: - Dictation

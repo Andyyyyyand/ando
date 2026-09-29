@@ -52,6 +52,7 @@ final class HybridSettings: ObservableObject {
         static let agentAllowsTerminalCommands = "hybridAgentAllowsTerminalCommands"
         static let agentUsesConnectedIntegrations = "hybridAgentUsesConnectedIntegrations"
         static let dictationCleanupWithClaude = "hybridDictationCleanupWithClaude"
+        static let wakeWordEnabled = "hybridWakeWordEnabled"
     }
 
     /// Claude models offered in the panel picker. Opus is the most capable;
@@ -123,6 +124,11 @@ final class HybridSettings: ObservableObject {
         didSet { UserDefaults.standard.set(dictationCleanupWithClaude, forKey: DefaultsKey.dictationCleanupWithClaude) }
     }
 
+    /// Hands-free mode: say "ei Clicky" instead of holding ctrl + option.
+    @Published var wakeWordEnabled: Bool {
+        didSet { UserDefaults.standard.set(wakeWordEnabled, forKey: DefaultsKey.wakeWordEnabled) }
+    }
+
     /// Mirrors whether a Claude API key is saved, so the UI can react
     /// without reading the Keychain on every render.
     @Published private(set) var hasClaudeAPIKey: Bool = false
@@ -139,6 +145,7 @@ final class HybridSettings: ObservableObject {
         agentAllowsTerminalCommands = defaults.bool(forKey: DefaultsKey.agentAllowsTerminalCommands)
         agentUsesConnectedIntegrations = defaults.object(forKey: DefaultsKey.agentUsesConnectedIntegrations) as? Bool ?? true
         dictationCleanupWithClaude = defaults.object(forKey: DefaultsKey.dictationCleanupWithClaude) as? Bool ?? true
+        wakeWordEnabled = defaults.object(forKey: DefaultsKey.wakeWordEnabled) as? Bool ?? true
         hasClaudeAPIKey = !(KeychainStore.readString(account: KeychainStore.claudeAPIKeyAccount) ?? "").isEmpty
     }
 

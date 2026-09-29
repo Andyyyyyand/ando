@@ -55,6 +55,11 @@ final class MenuBarPanelManager: NSObject {
                 self?.statusItemClicked()
             }
         )
+        // On Macs with a notch the island replaces the menu bar icon, so
+        // there is only one Clicky triangle at the top of the screen.
+        if notchIslandWindowManager?.islandFrame != nil {
+            statusItem?.isVisible = false
+        }
 
         dismissPanelObserver = NotificationCenter.default.addObserver(
             forName: .clickyDismissPanel,
@@ -234,6 +239,22 @@ final class MenuBarPanelManager: NSObject {
 
     private func positionPanelBelowStatusItem() {
         guard let panel else { return }
+
+        // With the notch island (menu bar icon hidden), open centered below it.
+        if statusItem?.isVisible == false, let islandFrame = notchIslandWindowManager?.islandFrame {
+            let fittingSize = panel.contentView?.fittingSize ?? CGSize(width: panelWidth, height: panelHeight)
+            panel.setFrame(
+                NSRect(
+                    x: islandFrame.midX - (panelWidth / 2),
+                    y: islandFrame.minY - fittingSize.height - 6,
+                    width: panelWidth,
+                    height: fittingSize.height
+                ),
+                display: true
+            )
+            return
+        }
+
         guard let buttonWindow = statusItem?.button?.window else { return }
 
         let statusItemFrame = buttonWindow.frame

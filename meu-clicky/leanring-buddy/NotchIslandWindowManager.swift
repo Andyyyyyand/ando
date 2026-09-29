@@ -21,6 +21,12 @@ private final class NotchIslandPanel: NSPanel {
 @MainActor
 final class NotchIslandWindowManager {
     private var islandPanel: NSPanel?
+
+    /// Screen frame of the island, or nil on Macs without a notch. The menu
+    /// bar panel opens below it.
+    var islandFrame: NSRect? {
+        islandPanel?.frame
+    }
     private let companionManager: CompanionManager
     private let onIslandClicked: () -> Void
     private var screenParametersObserver: NSObjectProtocol?

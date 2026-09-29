@@ -31,6 +31,8 @@ No painel você escolhe **Auto**, **Local** ou **Claude** e vê quem respondeu a
 | Segurar **ctrl + option + shift** | **Ditado:** o que você fala é digitado no app aberto (corrigido pelo Claude se houver chave) |
 | **ctrl + option** e dizer "agente, …" | Delega uma tarefa em segundo plano |
 
+**Sem apertar nada:** diga **"ei Clicky"** e, em seguida, a pergunta ("ei Clicky, onde fica o botão de exportar?"). A escuta roda 100% no Mac, pelo reconhecimento de voz da Apple, e pausa enquanto ele fala. Se não funcionar, baixe o português em Ajustes do Sistema → Teclado → Ditado. Dá para desligar em Configurações.
+
 No modo conversa ele também **abre programas e sites**: "abre o Spotify", "abre o YouTube".
 
 ### Integrações (Gmail, Google Agenda, Notion, Linear)

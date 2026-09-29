@@ -368,6 +368,7 @@ struct HybridControlsPanelSection: View {
             }
 
             // Dictation + agent options
+            settingsToggleRow(title: "Chamar dizendo \"ei Clicky\"", isOn: $hybridSettings.wakeWordEnabled)
             settingsToggleRow(title: "Ditado: corrigir com Claude", isOn: $hybridSettings.dictationCleanupWithClaude)
             settingsToggleRow(title: "Agente usa Gmail, Agenda, Notion…", isOn: $hybridSettings.agentUsesConnectedIntegrations)
             settingsToggleRow(title: "Agente pode usar o Terminal", isOn: $hybridSettings.agentAllowsTerminalCommands)

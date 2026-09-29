@@ -96,6 +96,7 @@ Worker vars: `ELEVENLABS_VOICE_ID`
 | `ClickyHomePanelView.swift` | ~330 | Home panel after setup: agents listed like conversations, tips row, glossy footer pills, gear swaps to settings. |
 | `ClickyHomeDesign.swift` | ~190 | Home look: glossy pill button style, pastel buddy avatars, time labels. |
 | `NotchIslandWindowManager.swift` | ~170 | Black island around the notch with the agent badge and the blue triangle; click opens the panel. |
+| `WakeWordListener.swift` | ~270 | Hands-free "ei Clicky": on-device speech recognition, captures the command after the wake phrase. |
 | `HybridControlsPanelSection.swift` | ~420 | Panel UI: brain mode, Claude model, API key, service status, voice, agent tasks. |
 | `worker/src/index.ts` | ~142 | Cloudflare Worker proxy. Three routes: `/chat` (Claude), `/tts` (ElevenLabs), `/transcribe-token` (AssemblyAI temp token). |
 
