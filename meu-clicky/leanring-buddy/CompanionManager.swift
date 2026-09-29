@@ -363,6 +363,14 @@ final class CompanionManager: ObservableObject {
 
         if !previouslyHadAll && allPermissionsGranted {
             ClickyAnalytics.trackAllPermissionsGranted()
+
+            // Permissions granted after launch (e.g. re-granted after a
+            // rebuild): bring the cursor back without requiring a restart.
+            if hasCompletedOnboarding && isClickyCursorEnabled && !isOverlayVisible {
+                overlayWindowManager.hasShownOverlayBefore = true
+                overlayWindowManager.showOverlay(onScreens: NSScreen.screens, companionManager: self)
+                isOverlayVisible = true
+            }
         }
     }
 
