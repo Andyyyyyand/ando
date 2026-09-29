@@ -592,7 +592,7 @@ final class CompanionManager: ObservableObject {
 
     there are two ways to point. always append the tag at the very end of your response, AFTER your spoken text.
 
-    1. preferred: the user message may include a numbered list of clickable elements read from the app's accessibility tree. if the thing you want to point at is in that list, append [ELEMENT:n:label] where n is its number and label is a short 1-3 word description. this lands exactly on the element.
+    1. preferred: the user message may include a numbered list of clickable elements read from the app's accessibility tree, each with its position in the screenshot (e.g. "at (512,300)"). if the thing you want to point at is in that list, append [ELEMENT:n:label] where n is its number and label is a short 1-3 word description. this lands exactly on the element. when several elements share a label, use the positions and the screenshot to pick the one the user means.
 
     2. fallback: if the element is not in the list (or there is no list), append [POINT:x,y:label] using the screenshot's pixel coordinates. the screenshot images are labeled with their pixel dimensions. origin (0,0) is the top-left corner. x increases rightward, y increases downward. if the element is on a DIFFERENT screen than the cursor, append :screenN (e.g. [POINT:400,300:terminal:screen2]).
 
@@ -669,10 +669,16 @@ final class CompanionManager: ObservableObject {
         transcript: String,
         labeledImages: [(data: Data, label: String)],
         historyForAPI: [(userPlaceholder: String, assistantResponse: String)],
-        userPromptWithContext: String
+        userPromptWithContext: String,
+        onPartialAnswerText: @escaping @MainActor @Sendable (String) -> Void
     ) async throws -> String {
         let settings = HybridSettings.shared
-        let isLocalModelReachable = await localVisionModelClient.isServerReachable()
+        // Skip the local server check when it can't change the outcome
+        // (no key → always local; Claude mode → always Claude).
+        let needsLocalReachabilityCheck = settings.hasClaudeAPIKey && settings.brainMode != .claudeOnly
+        let isLocalModelReachable = needsLocalReachabilityCheck
+            ? await localVisionModelClient.isServerReachable()
+            : true
         let brainChoice = HybridBrainRouter.chooseBrain(
             forTranscript: transcript,
             brainMode: settings.brainMode,
@@ -692,6 +698,7 @@ final class CompanionManager: ObservableObject {
                 if !(canEscalateToClaude && HybridBrainRouter.localAnswerRequestsEscalation(localAnswer)) {
                     lastAnsweringBrainDescription = "Local · \(settings.localVisionModelName)"
                     print("🧭 Answered by local model")
+                    onPartialAnswerText(localAnswer)
                     return localAnswer
                 }
                 print("🧭 Local model escalated the question to Claude")
@@ -711,8 +718,9 @@ final class CompanionManager: ObservableObject {
             systemPrompt: Self.companionVoiceResponseSystemPrompt,
             conversationHistory: historyForAPI,
             userPrompt: userPromptWithContext,
-            onTextChunk: { _ in
-                // No streaming text display — spinner stays until TTS plays
+            onTextChunk: { accumulatedAnswerText in
+                // Feeds the sentence-by-sentence speech queue as text streams in
+                onPartialAnswerText(accumulatedAnswerText)
             }
         )
         lastAnsweringBrainDescription = "Claude · \(settings.claudeModel)"
@@ -761,18 +769,48 @@ final class CompanionManager: ObservableObject {
 
                 var userPromptWithContext = transcript
                 if let accessibilitySnapshot, !accessibilitySnapshot.elements.isEmpty {
-                    userPromptWithContext = accessibilitySnapshot.promptDescription
+                    let elementListDescription = accessibilitySnapshot.promptDescription(
+                        screenshotLocationDescription: { accessibleElement in
+                            Self.screenshotLocationDescription(
+                                of: accessibleElement,
+                                screenCaptures: screenCaptures
+                            )
+                        }
+                    )
+                    userPromptWithContext = elementListDescription
                         + "\n\nuser's question: " + transcript
                 }
+
+                // Speak each sentence as soon as it is written instead of
+                // waiting for the whole answer.
+                let sentenceExtractor = StreamingSentenceExtractor()
+                localSpeechOutput.startSentenceQueue(onFirstSentenceStartedPlaying: { [weak self] in
+                    // The spinner gives way to the triangle once audio starts.
+                    self?.voiceState = .responding
+                })
 
                 let fullResponseText = try await answerWithHybridBrain(
                     transcript: transcript,
                     labeledImages: labeledImages,
                     historyForAPI: historyForAPI,
-                    userPromptWithContext: userPromptWithContext
+                    userPromptWithContext: userPromptWithContext,
+                    onPartialAnswerText: { [weak self] accumulatedAnswerText in
+                        guard let self else { return }
+                        let newSentences = sentenceExtractor.extractNewCompleteSentences(from: accumulatedAnswerText)
+                        guard !newSentences.isEmpty else { return }
+                        for sentenceText in newSentences {
+                            self.localSpeechOutput.enqueueSentence(sentenceText)
+                        }
+                        self.showSpokenResponseBubble(sentenceExtractor.handedOutText)
+                    }
                 )
 
                 guard !Task.isCancelled else { return }
+
+                // Queue whatever is left after the last full sentence.
+                let remainingSpeakableText = sentenceExtractor.extractRemainingText(from: fullResponseText)
+                localSpeechOutput.enqueueSentence(remainingSpeakableText)
+                localSpeechOutput.finishSentenceQueue()
 
                 // Parse the [ELEMENT:n] tag first, then the [POINT:...] tag
                 let elementParseResult = Self.parseAccessibilityElementTag(from: fullResponseText)
@@ -869,18 +907,10 @@ final class CompanionManager: ObservableObject {
 
                 ClickyAnalytics.trackAIResponseReceived(response: spokenText)
 
-                // Play the response via TTS. Keep the spinner (processing state)
-                // until the audio actually starts playing, then switch to responding.
+                // Audio is already playing (or about to) from the sentence
+                // queue; show the complete answer text in the bubble.
                 if !spokenText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    do {
-                        try await localSpeechOutput.speakText(spokenText)
-                        // speakText returns after playback starts — audio is now playing
-                        voiceState = .responding
-                        showSpokenResponseBubble(spokenText)
-                    } catch {
-                        ClickyAnalytics.trackTTSError(error: error.localizedDescription)
-                        print("⚠️ TTS error: \(error)")
-                    }
+                    showSpokenResponseBubble(spokenText)
                 }
             } catch is CancellationError {
                 // User spoke again — response was interrupted
@@ -942,6 +972,34 @@ final class CompanionManager: ObservableObject {
         }
         localSpeechOutput.speakWithSystemVoice(errorUtterance)
         voiceState = .responding
+    }
+
+    /// Describes where an accessibility element sits in the screenshots, in
+    /// the same pixel space the model sees (e.g. "at (512,300)" or
+    /// "at (400,300) on screen2").
+    private static func screenshotLocationDescription(
+        of accessibleElement: AccessibleScreenElement,
+        screenCaptures: [CompanionScreenCapture]
+    ) -> String? {
+        let elementCenterInAppKitCoordinates = AccessibilityElementCollector.appKitCenterPoint(of: accessibleElement)
+        guard let captureIndex = screenCaptures.firstIndex(where: { $0.displayFrame.contains(elementCenterInAppKitCoordinates) }) else {
+            return nil
+        }
+        let screenCapture = screenCaptures[captureIndex]
+        let displayFrame = screenCapture.displayFrame
+        guard displayFrame.width > 0, displayFrame.height > 0 else { return nil }
+
+        let horizontalScale = CGFloat(screenCapture.screenshotWidthInPixels) / displayFrame.width
+        let verticalScale = CGFloat(screenCapture.screenshotHeightInPixels) / displayFrame.height
+        let screenshotX = Int((elementCenterInAppKitCoordinates.x - displayFrame.minX) * horizontalScale)
+        // Screenshots use a top-left origin; AppKit uses bottom-left.
+        let screenshotY = Int((displayFrame.maxY - elementCenterInAppKitCoordinates.y) * verticalScale)
+
+        var locationDescription = "at (\(screenshotX),\(screenshotY))"
+        if screenCaptures.count > 1 {
+            locationDescription += " on screen\(captureIndex + 1)"
+        }
+        return locationDescription
     }
 
     // MARK: - Accessibility Element Tag Parsing

@@ -63,7 +63,7 @@ final class AppleSpeechTranscriptionProvider: BuddyTranscriptionProvider {
 }
 
 private final class AppleSpeechTranscriptionSession: NSObject, BuddyStreamingTranscriptionSession {
-    let finalTranscriptFallbackDelaySeconds: TimeInterval = 1.8
+    let finalTranscriptFallbackDelaySeconds: TimeInterval = 1.0
 
     private let recognitionRequest: SFSpeechAudioBufferRecognitionRequest
     private var recognitionTask: SFSpeechRecognitionTask?

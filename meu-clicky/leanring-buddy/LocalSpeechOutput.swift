@@ -20,6 +20,22 @@ final class LocalSpeechOutput: NSObject {
     private var audioPlayer: AVAudioPlayer?
     private let systemSpeechSynthesizer = AVSpeechSynthesizer()
 
+    // MARK: Sentence queue state
+    //
+    // Answers are spoken sentence by sentence while the model is still
+    // writing: each sentence starts synthesizing as soon as it arrives, and
+    // playback walks the queue in order. The first words are heard after one
+    // short sentence instead of after the whole answer.
+
+    private var queuedSentenceTexts: [String] = []
+    private var queuedSentenceSynthesisTasks: [Task<Data?, Never>] = []
+    private var isSentenceQueueInputFinished = false
+    private var sentenceQueuePlaybackTask: Task<Void, Never>?
+    /// Changes every time the queue is reset, so a stale playback task never
+    /// clears the state of a newer one.
+    private var sentenceQueueGeneration = UUID()
+    private var onFirstQueuedSentenceStartedPlaying: (() -> Void)?
+
     override init() {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 30
@@ -51,14 +67,98 @@ final class LocalSpeechOutput: NSObject {
     }
 
     var isPlaying: Bool {
-        (audioPlayer?.isPlaying ?? false) || systemSpeechSynthesizer.isSpeaking
+        sentenceQueuePlaybackTask != nil
+            || (audioPlayer?.isPlaying ?? false)
+            || systemSpeechSynthesizer.isSpeaking
     }
 
     func stopPlayback() {
+        sentenceQueuePlaybackTask?.cancel()
+        sentenceQueuePlaybackTask = nil
+        for synthesisTask in queuedSentenceSynthesisTasks {
+            synthesisTask.cancel()
+        }
+        queuedSentenceSynthesisTasks.removeAll()
+        queuedSentenceTexts.removeAll()
+        isSentenceQueueInputFinished = true
+        onFirstQueuedSentenceStartedPlaying = nil
+        sentenceQueueGeneration = UUID()
+
         audioPlayer?.stop()
         audioPlayer = nil
         if systemSpeechSynthesizer.isSpeaking {
             systemSpeechSynthesizer.stopSpeaking(at: .immediate)
+        }
+    }
+
+    // MARK: - Sentence queue
+
+    /// Starts an empty queue. Call `enqueueSentence` as sentences arrive and
+    /// `finishSentenceQueue` when the answer is complete.
+    func startSentenceQueue(onFirstSentenceStartedPlaying: @escaping () -> Void) {
+        stopPlayback()
+        isSentenceQueueInputFinished = false
+        onFirstQueuedSentenceStartedPlaying = onFirstSentenceStartedPlaying
+        let queueGeneration = sentenceQueueGeneration
+        sentenceQueuePlaybackTask = Task {
+            await playQueuedSentencesInOrder(queueGeneration: queueGeneration)
+        }
+    }
+
+    func enqueueSentence(_ sentenceText: String) {
+        let trimmedSentenceText = sentenceText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedSentenceText.isEmpty, !isSentenceQueueInputFinished else { return }
+        queuedSentenceTexts.append(trimmedSentenceText)
+        // Synthesis starts right away, so the next sentence is usually ready
+        // by the time the current one finishes playing.
+        queuedSentenceSynthesisTasks.append(Task {
+            try? await synthesizeWithKokoro(trimmedSentenceText)
+        })
+    }
+
+    /// No more sentences will arrive; playback ends after the last one.
+    func finishSentenceQueue() {
+        isSentenceQueueInputFinished = true
+    }
+
+    private func playQueuedSentencesInOrder(queueGeneration: UUID) async {
+        while !Task.isCancelled {
+            if queuedSentenceSynthesisTasks.isEmpty {
+                if isSentenceQueueInputFinished { break }
+                try? await Task.sleep(nanoseconds: 40_000_000)
+                continue
+            }
+
+            let synthesisTask = queuedSentenceSynthesisTasks.removeFirst()
+            let sentenceText = queuedSentenceTexts.removeFirst()
+            let synthesizedAudioData = await synthesisTask.value
+            guard !Task.isCancelled else { return }
+
+            if let synthesizedAudioData, let sentencePlayer = try? AVAudioPlayer(data: synthesizedAudioData) {
+                audioPlayer = sentencePlayer
+                sentencePlayer.play()
+            } else {
+                // Kokoro unavailable — the macOS voice keeps Clicky talking.
+                let utterance = AVSpeechUtterance(string: sentenceText)
+                utterance.voice = Self.bestSystemVoice(forLanguage: HybridSettings.shared.speechLocaleIdentifier)
+                systemSpeechSynthesizer.speak(utterance)
+            }
+
+            if let firstSentenceCallback = onFirstQueuedSentenceStartedPlaying {
+                onFirstQueuedSentenceStartedPlaying = nil
+                firstSentenceCallback()
+            }
+
+            // Wait for this sentence to finish before starting the next.
+            try? await Task.sleep(nanoseconds: 80_000_000)
+            while (audioPlayer?.isPlaying ?? false) || systemSpeechSynthesizer.isSpeaking {
+                try? await Task.sleep(nanoseconds: 30_000_000)
+                if Task.isCancelled { return }
+            }
+        }
+
+        if sentenceQueueGeneration == queueGeneration {
+            sentenceQueuePlaybackTask = nil
         }
     }
 
@@ -125,5 +225,75 @@ final class LocalSpeechOutput: NSObject {
             return enhancedVoice
         }
         return matchingVoices.first ?? AVSpeechSynthesisVoice(language: languageIdentifier)
+    }
+}
+
+/// Splits a streaming answer into complete sentences as it grows, so each
+/// sentence can be spoken as soon as it is written. Everything from the
+/// first "[" on is held back: that is where the [ELEMENT]/[POINT] pointing
+/// tag starts, and it must never be read aloud.
+@MainActor
+final class StreamingSentenceExtractor {
+    /// Characters of the speakable text already handed out as sentences.
+    private var consumedCharacterCount = 0
+
+    /// All sentences handed out so far, joined — shown in the text bubble
+    /// while the rest of the answer is still being written.
+    private(set) var handedOutText = ""
+
+    /// Sentences shorter than this are merged with the next one, so the
+    /// voice doesn't stutter through "ok." "então." as separate clips.
+    private let minimumSentenceLength = 12
+
+    func extractNewCompleteSentences(from accumulatedText: String) -> [String] {
+        let speakableCharacters = Array(Self.textBeforePointingTag(accumulatedText))
+        guard consumedCharacterCount < speakableCharacters.count else { return [] }
+
+        var completeSentences: [String] = []
+        var sentenceStartIndex = consumedCharacterCount
+        var characterIndex = consumedCharacterCount
+
+        while characterIndex < speakableCharacters.count {
+            let character = speakableCharacters[characterIndex]
+            let isSentenceEndingCharacter = ".!?…".contains(character) || character == "\n"
+            let nextCharacterIndex = characterIndex + 1
+            // Require whitespace after the punctuation so "3.5" or a still-
+            // streaming "..." don't split a sentence early.
+            let isFollowedByWhitespace = nextCharacterIndex < speakableCharacters.count
+                && speakableCharacters[nextCharacterIndex].isWhitespace
+            let currentSentenceLength = characterIndex - sentenceStartIndex + 1
+
+            if isSentenceEndingCharacter && isFollowedByWhitespace && currentSentenceLength >= minimumSentenceLength {
+                let sentenceText = String(speakableCharacters[sentenceStartIndex...characterIndex])
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                if !sentenceText.isEmpty {
+                    completeSentences.append(sentenceText)
+                }
+                sentenceStartIndex = nextCharacterIndex
+            }
+            characterIndex += 1
+        }
+
+        consumedCharacterCount = sentenceStartIndex
+        for sentenceText in completeSentences {
+            handedOutText += (handedOutText.isEmpty ? "" : " ") + sentenceText
+        }
+        return completeSentences
+    }
+
+    /// Returns whatever speakable text has not been handed out yet. Called
+    /// once the full answer has arrived.
+    func extractRemainingText(from fullText: String) -> String {
+        let speakableCharacters = Array(Self.textBeforePointingTag(fullText))
+        guard consumedCharacterCount < speakableCharacters.count else { return "" }
+        let remainingText = String(speakableCharacters[consumedCharacterCount...])
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        consumedCharacterCount = speakableCharacters.count
+        return remainingText
+    }
+
+    private static func textBeforePointingTag(_ text: String) -> String {
+        guard let tagStartIndex = text.firstIndex(of: "[") else { return text }
+        return String(text[..<tagStartIndex])
     }
 }

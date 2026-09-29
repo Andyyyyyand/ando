@@ -32,9 +32,20 @@ struct AccessibilitySnapshot {
     /// Compact list that is appended to the prompt, e.g.
     /// `[7] button "Save" (top right)`.
     var promptDescription: String {
+        promptDescription(screenshotLocationDescription: { _ in nil })
+    }
+
+    /// Same list, with each element's position in screenshot pixels
+    /// appended (e.g. `at (512,300)`), so the model can match the list to
+    /// what it sees and pick the right one when labels repeat.
+    func promptDescription(screenshotLocationDescription: (AccessibleScreenElement) -> String?) -> String {
         guard !elements.isEmpty else { return "" }
         let elementLines = elements.map { element in
-            "[\(element.elementNumber)] \(element.roleDescription) \"\(element.label)\""
+            var elementLine = "[\(element.elementNumber)] \(element.roleDescription) \"\(element.label)\""
+            if let locationDescription = screenshotLocationDescription(element) {
+                elementLine += " " + locationDescription
+            }
+            return elementLine
         }
         return "clickable elements in \(applicationName) (from the accessibility tree):\n" + elementLines.joined(separator: "\n")
     }
@@ -65,7 +76,7 @@ enum AccessibilityElementCollector {
     /// tree (a long web page) never stalls the push-to-talk pipeline.
     static func collectFrontmostApplicationElements(
         maximumElementCount: Int = 120,
-        timeBudgetSeconds: TimeInterval = 0.35
+        timeBudgetSeconds: TimeInterval = 0.25
     ) -> AccessibilitySnapshot? {
         guard AXIsProcessTrusted(),
               let frontmostApplication = NSWorkspace.shared.frontmostApplication,
