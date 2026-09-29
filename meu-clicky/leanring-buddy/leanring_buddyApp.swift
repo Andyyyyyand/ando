@@ -34,6 +34,18 @@ final class CompanionAppDelegate: NSObject, NSApplicationDelegate {
     private var sparkleUpdaterController: SPUStandardUpdaterController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Only one Clicky at a time: rebuilding leaves copies in the build
+        // folder that macOS (or the login item) may also launch. Close any
+        // other running copy so there is a single triangle and hotkey owner.
+        let currentProcessIdentifier = ProcessInfo.processInfo.processIdentifier
+        if let bundleIdentifier = Bundle.main.bundleIdentifier {
+            for otherRunningCopy in NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier)
+            where otherRunningCopy.processIdentifier != currentProcessIdentifier {
+                print("🎯 Clicky: closing another running copy (pid \(otherRunningCopy.processIdentifier))")
+                otherRunningCopy.forceTerminate()
+            }
+        }
+
         print("🎯 Clicky: Starting...")
         print("🎯 Clicky: Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown")")
 

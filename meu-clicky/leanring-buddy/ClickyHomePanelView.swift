@@ -88,6 +88,13 @@ struct ClickyHomePanelView: View {
             iconButton(systemName: isShowingSettings ? "xmark.circle.fill" : "gearshape.fill") {
                 toggleSettings()
             }
+
+            // Quit Clicky (the menu bar icon is hidden on notch Macs, so the
+            // panel is the only place to close the app).
+            iconButton(systemName: "power") {
+                NSApp.terminate(nil)
+            }
+            .help("Fechar o Clicky")
         }
     }
 
