@@ -92,6 +92,13 @@ final class CompanionManager: ObservableObject {
     /// Which brain answered the most recent question, shown in the panel.
     @Published private(set) var lastAnsweringBrainDescription: String?
 
+    /// The answer currently being spoken, shown as text next to the blue
+    /// cursor. Empty when nothing should be shown.
+    @Published private(set) var spokenResponseBubbleText: String = ""
+
+    /// Hides the response bubble a few seconds after speech ends.
+    private var spokenResponseBubbleHideTask: Task<Void, Never>?
+
     /// Conversation history so Claude remembers prior exchanges within a session.
     /// Each entry is the user's transcript and Claude's response.
     private var conversationHistory: [(userTranscript: String, assistantResponse: String)] = []
@@ -257,6 +264,36 @@ final class CompanionManager: ObservableObject {
                 self?.onboardingMusicPlayer = nil
                 self?.onboardingMusicFadeTimer = nil
             }
+        }
+    }
+
+    /// Shows `responseText` next to the cursor and keeps it up while the
+    /// voice plays, then fades it out a few seconds after speech ends.
+    private func showSpokenResponseBubble(_ responseText: String) {
+        spokenResponseBubbleHideTask?.cancel()
+        withAnimation(.easeOut(duration: 0.2)) {
+            spokenResponseBubbleText = responseText
+        }
+
+        spokenResponseBubbleHideTask = Task {
+            // Give playback a moment to start before polling isPlaying.
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            while localSpeechOutput.isPlaying {
+                try? await Task.sleep(nanoseconds: 250_000_000)
+                guard !Task.isCancelled else { return }
+            }
+            // Leave the text up briefly so the user can finish reading.
+            try? await Task.sleep(nanoseconds: 4_000_000_000)
+            guard !Task.isCancelled else { return }
+            hideSpokenResponseBubble()
+        }
+    }
+
+    private func hideSpokenResponseBubble() {
+        spokenResponseBubbleHideTask?.cancel()
+        spokenResponseBubbleHideTask = nil
+        withAnimation(.easeOut(duration: 0.3)) {
+            spokenResponseBubbleText = ""
         }
     }
 
@@ -474,6 +511,7 @@ final class CompanionManager: ObservableObject {
             currentResponseTask?.cancel()
             localSpeechOutput.stopPlayback()
             clearDetectedElementLocation()
+            hideSpokenResponseBubble()
 
             // Dismiss the onboarding prompt if it's showing
             if showOnboardingPrompt {
@@ -830,6 +868,7 @@ final class CompanionManager: ObservableObject {
                         try await localSpeechOutput.speakText(spokenText)
                         // speakText returns after playback starts — audio is now playing
                         voiceState = .responding
+                        showSpokenResponseBubble(spokenText)
                     } catch {
                         ClickyAnalytics.trackTTSError(error: error.localizedDescription)
                         print("⚠️ TTS error: \(error)")

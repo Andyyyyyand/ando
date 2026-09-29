@@ -85,6 +85,14 @@ struct NavigationBubbleSizePreferenceKey: PreferenceKey {
     }
 }
 
+// PreferenceKey for tracking the spoken-response text bubble size
+struct ResponseBubbleSizePreferenceKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
+        value = nextValue()
+    }
+}
+
 /// The buddy's behavioral mode. Controls whether it follows the cursor,
 /// is flying toward a detected UI element, or is pointing at an element.
 enum BuddyNavigationMode {
@@ -143,6 +151,9 @@ struct BlueCursorView: View {
     @State private var navigationBubbleText: String = ""
     @State private var navigationBubbleOpacity: Double = 0.0
     @State private var navigationBubbleSize: CGSize = .zero
+
+    /// Measured size of the text bubble that shows what the buddy is saying.
+    @State private var responseBubbleSize: CGSize = .zero
 
     /// The cursor position at the moment navigation started, used to detect
     /// if the user moves the cursor enough to cancel the navigation.
@@ -292,6 +303,46 @@ struct BlueCursorView: View {
                     .onPreferenceChange(NavigationBubbleSizePreferenceKey.self) { newSize in
                         navigationBubbleSize = newSize
                     }
+            }
+
+            // Spoken-response bubble — shows the answer as text next to the
+            // buddy while it is being spoken, so the user can read along.
+            // Hidden during pointing flights so it doesn't collide with the
+            // short navigation bubble.
+            if buddyIsVisibleOnThisScreen
+                && buddyNavigationMode == .followingCursor
+                && !companionManager.spokenResponseBubbleText.isEmpty {
+                Text(companionManager.spokenResponseBubbleText)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.leading)
+                    .lineSpacing(2)
+                    .lineLimit(10)
+                    .frame(maxWidth: 320, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(DS.Colors.overlayCursorBlue)
+                            .shadow(color: DS.Colors.overlayCursorBlue.opacity(0.5), radius: 6, x: 0, y: 0)
+                    )
+                    .overlay(
+                        GeometryReader { geo in
+                            Color.clear
+                                .preference(key: ResponseBubbleSizePreferenceKey.self, value: geo.size)
+                        }
+                    )
+                    .position(
+                        x: cursorPosition.x + 14 + (responseBubbleSize.width / 2),
+                        y: cursorPosition.y + 14 + (responseBubbleSize.height / 2)
+                    )
+                    .animation(.spring(response: 0.2, dampingFraction: 0.6, blendDuration: 0), value: cursorPosition)
+                    .transition(.opacity)
+                    .onPreferenceChange(ResponseBubbleSizePreferenceKey.self) { newSize in
+                        responseBubbleSize = newSize
+                    }
+                    .allowsHitTesting(false)
             }
 
             // Blue triangle cursor — shown when idle or while TTS is playing (responding).
