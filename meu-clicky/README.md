@@ -56,6 +56,14 @@ O script instala:
 Se nunca usou o Claude Code, rode `claude` no Terminal uma vez e faça login.
 
 ### 2. Compilar o app
+
+**Só pelo Terminal (sem abrir o Xcode):**
+```bash
+bash scripts/compilar-e-abrir.sh
+```
+O script instala o Xcode pela App Store se faltar (para isso, você precisa estar logado na App Store), compila e coloca o app em `~/Applications/Meu Clicky.app`. A assinatura é local, então não precisa configurar Apple ID. **Limitação:** depois de cada nova compilação, o macOS pede as permissões de novo.
+
+**Ou pelo Xcode:**
 1. Instale o **Xcode 26** pela App Store.
 2. Abra o projeto: `open leanring-buddy.xcodeproj`
 3. Selecione o projeto **leanring-buddy** → aba **Signing & Capabilities** → em **Team**, escolha o seu Apple ID. Se não aparecer nenhum, clique em "Add Account…"; um Apple ID gratuito funciona.
