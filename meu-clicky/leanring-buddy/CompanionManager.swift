@@ -94,6 +94,31 @@ final class CompanionManager: ObservableObject {
 
     /// Which brain answered the most recent question, shown in the panel.
     @Published private(set) var lastAnsweringBrainDescription: String?
+    /// True when the last answer's [POINT] tag is on a 0-1000 grid instead of
+    /// screenshot pixels (see `localModelAnswersInThousandths`).
+    private var lastAnswerPointIsInThousandths = false
+
+    /// Qwen3-VL was trained to give coordinates on a 0-1000 grid and does so
+    /// even when the prompt asks for pixels. Read as pixels they land up and to
+    /// the left of the target, so they get rescaled before pointing.
+    private var localModelAnswersInThousandths: Bool {
+        HybridSettings.shared.localVisionModelName.lowercased().contains("qwen3-vl")
+    }
+
+    /// Converts a [POINT] coordinate from the 0-1000 grid to screenshot pixels
+    /// when needed; Claude and other local models already answer in pixels.
+    private func screenshotPixelCoordinate(
+        from pointCoordinate: CGPoint,
+        isInThousandths: Bool,
+        screenshotWidth: CGFloat,
+        screenshotHeight: CGFloat
+    ) -> CGPoint {
+        guard isInThousandths else { return pointCoordinate }
+        return CGPoint(
+            x: pointCoordinate.x / 1000 * screenshotWidth,
+            y: pointCoordinate.y / 1000 * screenshotHeight
+        )
+    }
 
     /// The answer currently being spoken, shown as text next to the blue
     /// cursor. Empty when nothing should be shown.
@@ -540,6 +565,8 @@ final class CompanionManager: ObservableObject {
 
             ClickyAnalytics.trackPushToTalkStarted()
 
+            wakeWordListener.pauseListeningNow()
+
             pendingKeyboardShortcutStartTask?.cancel()
             pendingKeyboardShortcutStartTask = Task {
                 await buddyDictationManager.startPushToTalkFromKeyboardShortcut(
@@ -610,6 +637,12 @@ final class CompanionManager: ObservableObject {
     opening things:
     you can open apps and web pages on the user's mac. when the user asks you to open, launch or go to something, add [OPEN_APP:exact macos app name] (e.g. [OPEN_APP:Spotify], [OPEN_APP:System Settings]) or [OPEN_URL:full url] (e.g. [OPEN_URL:https://youtube.com]). put these action tags right after your spoken text and BEFORE the pointing tag, and confirm briefly out loud, like "abrindo o spotify". never read the tags aloud.
 
+    music:
+    you control spotify directly. to play a specific song, artist, album or playlist, add [SPOTIFY_PLAY:song name and artist] (e.g. [SPOTIFY_PLAY:because of you cale]); it plays the top search result. if the user says "essa música" or "essa aqui", read the song and artist from the screen. to control what is already loaded, add [SPOTIFY_CONTROL:play], [SPOTIFY_CONTROL:pause], [SPOTIFY_CONTROL:next] or [SPOTIFY_CONTROL:previous]. after a music tag add [POINT:none] — don't point at spotify's buttons, the music tag already does it. confirm briefly, like "tocando because of you".
+
+    what you can and can't do:
+    the only things you actually do on the mac are the action tags above (open apps and links, control spotify). you cannot click, type, scroll or press buttons for the user. for anything else, never say you did it ("pronto", "cliquei", "dando play") — tell the user where to click and point at it.
+
     examples:
     - user asks how to color grade in final cut and the list has "[12] button "Color Inspector"": "abre o inspetor de cor, ele fica ali no canto de cima da barra de ferramentas. clica nele e aparecem as rodas de cor e as curvas. [ELEMENT:12:inspetor de cor]"
     - user asks what html is: "html é a linguagem de marcação de hipertexto, é basicamente o esqueleto de toda página web. dá uma olhada em como ela se conecta com o css que você está vendo. [POINT:none]"
@@ -629,6 +662,8 @@ final class CompanionManager: ObservableObject {
         - [POINT:none] if pointing doesn't help.
 
         to open an app or website the user asks for, add [OPEN_APP:exact macos app name] or [OPEN_URL:full url] before the pointing tag.
+        to play music add [SPOTIFY_PLAY:song and artist]; to control playback add [SPOTIFY_CONTROL:play], [SPOTIFY_CONTROL:pause], [SPOTIFY_CONTROL:next] or [SPOTIFY_CONTROL:previous]. then add [POINT:none].
+        you cannot click or type for the user. never say you did something except opening apps, links or controlling spotify; say where to click instead.
         """
         if canEscalateToClaude {
             localPrompt += """
@@ -767,12 +802,15 @@ final class CompanionManager: ObservableObject {
     enum SpokenAnswerAction {
         case openApplication(applicationName: String)
         case openURL(urlString: String)
+        case playSpotifySearch(searchQuery: String)
+        case controlSpotify(command: String)
     }
 
-    /// Pulls [OPEN_APP:name] and [OPEN_URL:url] tags out of an answer. They
-    /// let the talk-mode brain open programs and pages on request.
+    /// Pulls [OPEN_APP:name], [OPEN_URL:url], [SPOTIFY_PLAY:song] and
+    /// [SPOTIFY_CONTROL:command] tags out of an answer. They let the
+    /// talk-mode brain actually do these things instead of only pointing.
     static func extractSpokenAnswerActions(from responseText: String) -> (textWithoutActions: String, actions: [SpokenAnswerAction]) {
-        let pattern = #"\[(OPEN_APP|OPEN_URL):\s*([^\]]+?)\s*\]"#
+        let pattern = #"\[(OPEN_APP|OPEN_URL|SPOTIFY_PLAY|SPOTIFY_CONTROL):\s*([^\]]+?)\s*\]"#
         guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
             return (responseText, [])
         }
@@ -783,9 +821,14 @@ final class CompanionManager: ObservableObject {
             guard let kindRange = Range(match.range(at: 1), in: responseText),
                   let valueRange = Range(match.range(at: 2), in: responseText) else { continue }
             let actionValue = String(responseText[valueRange])
-            if responseText[kindRange] == "OPEN_APP" {
+            switch responseText[kindRange] {
+            case "OPEN_APP":
                 actions.append(.openApplication(applicationName: actionValue))
-            } else {
+            case "SPOTIFY_PLAY":
+                actions.append(.playSpotifySearch(searchQuery: actionValue))
+            case "SPOTIFY_CONTROL":
+                actions.append(.controlSpotify(command: actionValue))
+            default:
                 actions.append(.openURL(urlString: actionValue))
             }
         }
@@ -806,6 +849,12 @@ final class CompanionManager: ObservableObject {
                 case .openURL(let urlString):
                     try MacQuickActions.openURL(urlString)
                     print("🚀 Opened URL: \(urlString)")
+                case .playSpotifySearch(let searchQuery):
+                    try MacQuickActions.playSpotifySearch(query: searchQuery)
+                    print("🎵 Spotify playing search: \(searchQuery)")
+                case .controlSpotify(let command):
+                    try MacQuickActions.controlSpotify(command: command)
+                    print("🎵 Spotify: \(command)")
                 }
             } catch {
                 print("⚠️ Could not perform action: \(error.localizedDescription)")
@@ -866,6 +915,7 @@ final class CompanionManager: ObservableObject {
                 )
                 if !(canEscalateToClaude && HybridBrainRouter.localAnswerRequestsEscalation(localAnswer)) {
                     lastAnsweringBrainDescription = "Local · \(settings.localVisionModelName)"
+                    lastAnswerPointIsInThousandths = localModelAnswersInThousandths
                     print("🧭 Answered by local model")
                     onPartialAnswerText(localAnswer)
                     return localAnswer
@@ -893,6 +943,7 @@ final class CompanionManager: ObservableObject {
             }
         )
         lastAnsweringBrainDescription = "Claude · \(settings.claudeModel)"
+        lastAnswerPointIsInThousandths = false
         print("🧭 Answered by Claude")
         return claudeAnswer
     }
@@ -911,6 +962,7 @@ final class CompanionManager: ObservableObject {
         currentResponseTask = Task {
             // Stay in processing (spinner) state — no streaming text displayed
             voiceState = .processing
+            let answerPipelineStartedAt = Date()
 
             do {
                 // Capture all connected screens so the AI has full context
@@ -954,6 +1006,7 @@ final class CompanionManager: ObservableObject {
                 // waiting for the whole answer.
                 let sentenceExtractor = StreamingSentenceExtractor()
                 localSpeechOutput.startSentenceQueue(onFirstSentenceStartedPlaying: { [weak self] in
+                    print("⏱️ Voice started \(String(format: "%.1f", Date().timeIntervalSince(answerPipelineStartedAt)))s after the question")
                     // The spinner gives way to the triangle once audio starts.
                     self?.voiceState = .responding
                 })
@@ -975,6 +1028,7 @@ final class CompanionManager: ObservableObject {
                 )
 
                 guard !Task.isCancelled else { return }
+                print("💬 Raw answer: \(fullResponseText)")
 
                 // Queue whatever is left after the last full sentence.
                 let remainingSpeakableText = sentenceExtractor.extractRemainingText(from: fullResponseText)
@@ -1026,13 +1080,19 @@ final class CompanionManager: ObservableObject {
                         return screenCaptures.first(where: { $0.isCursorScreen })
                     }()
 
-                    if let pointCoordinate = parseResult.coordinate,
+                    if let modelPointCoordinate = parseResult.coordinate,
                        let targetScreenCapture {
                         // The coordinates are in the screenshot's pixel space
                         // (top-left origin, e.g. 1280x831). Scale to the display's
                         // point space (e.g. 1512x982), then convert to AppKit global coords.
                         let screenshotWidth = CGFloat(targetScreenCapture.screenshotWidthInPixels)
                         let screenshotHeight = CGFloat(targetScreenCapture.screenshotHeightInPixels)
+                        let pointCoordinate = screenshotPixelCoordinate(
+                            from: modelPointCoordinate,
+                            isInThousandths: lastAnswerPointIsInThousandths,
+                            screenshotWidth: screenshotWidth,
+                            screenshotHeight: screenshotHeight
+                        )
                         let displayWidth = CGFloat(targetScreenCapture.displayWidthInPoints)
                         let displayHeight = CGFloat(targetScreenCapture.displayHeightInPoints)
                         let displayFrame = targetScreenCapture.displayFrame
@@ -1186,17 +1246,17 @@ final class CompanionManager: ObservableObject {
 
     /// Parses an [ELEMENT:n] or [ELEMENT:n:label] tag at the end of the answer.
     static func parseAccessibilityElementTag(from responseText: String) -> AccessibilityElementTagParseResult {
-        let pattern = #"\[ELEMENT:\s*(\d+)\s*(?::([^\]]*))?\]\s*$"#
+        // Not anchored to the end: models sometimes keep talking after the tag.
+        let pattern = #"\[ELEMENT:\s*(\d+)\s*(?::([^\]]*))?\]"#
 
         guard let regex = try? NSRegularExpression(pattern: pattern, options: []),
-              let match = regex.firstMatch(in: responseText, range: NSRange(responseText.startIndex..., in: responseText)),
+              let match = regex.matches(in: responseText, range: NSRange(responseText.startIndex..., in: responseText)).last,
               let tagRange = Range(match.range, in: responseText),
               let numberRange = Range(match.range(at: 1), in: responseText) else {
             return AccessibilityElementTagParseResult(textWithoutElementTag: responseText, elementNumber: nil, elementLabel: nil)
         }
 
-        let textWithoutElementTag = String(responseText[..<tagRange.lowerBound])
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let textWithoutElementTag = Self.textWithTagRemoved(responseText, tagRange: tagRange)
         var elementLabel: String? = nil
         if let labelRange = Range(match.range(at: 2), in: responseText) {
             elementLabel = String(responseText[labelRange]).trimmingCharacters(in: .whitespaces)
@@ -1207,6 +1267,13 @@ final class CompanionManager: ObservableObject {
             elementNumber: Int(responseText[numberRange]),
             elementLabel: elementLabel
         )
+    }
+
+    /// The answer with one tag cut out, keeping any words that came after it.
+    private static func textWithTagRemoved(_ responseText: String, tagRange: Range<String.Index>) -> String {
+        let textBeforeTag = responseText[..<tagRange.lowerBound].trimmingCharacters(in: .whitespacesAndNewlines)
+        let textAfterTag = responseText[tagRange.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines)
+        return textAfterTag.isEmpty ? textBeforeTag : textBeforeTag + " " + textAfterTag
     }
 
     // MARK: - Point Tag Parsing
@@ -1227,17 +1294,18 @@ final class CompanionManager: ObservableObject {
     /// Returns the spoken text (tag removed) and the optional coordinate + label + screen number.
     static func parsePointingCoordinates(from responseText: String) -> PointingParseResult {
         // Match [POINT:none] or [POINT:123,456:label] or [POINT:123,456:label:screen2]
-        let pattern = #"\[POINT:(?:none|(\d+)\s*,\s*(\d+)(?::([^\]:\s][^\]:]*?))?(?::screen(\d+))?)\]\s*$"#
+        // Not anchored to the end: models sometimes keep talking after the tag.
+        let pattern = #"\[POINT:(?:none|(\d+)\s*,\s*(\d+)(?::([^\]:\s][^\]:]*?))?(?::screen(\d+))?)\]"#
 
         guard let regex = try? NSRegularExpression(pattern: pattern, options: []),
-              let match = regex.firstMatch(in: responseText, range: NSRange(responseText.startIndex..., in: responseText)) else {
+              let match = regex.matches(in: responseText, range: NSRange(responseText.startIndex..., in: responseText)).last else {
             // No tag found at all
             return PointingParseResult(spokenText: responseText, coordinate: nil, elementLabel: nil, screenNumber: nil)
         }
 
         // Remove the tag from the spoken text
         let tagRange = Range(match.range, in: responseText)!
-        let spokenText = String(responseText[..<tagRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+        let spokenText = Self.textWithTagRemoved(responseText, tagRange: tagRange)
 
         // Check if it's [POINT:none]
         guard match.numberOfRanges >= 3,
@@ -1447,13 +1515,19 @@ final class CompanionManager: ObservableObject {
 
                 let parseResult = Self.parsePointingCoordinates(from: fullResponseText)
 
-                guard let pointCoordinate = parseResult.coordinate else {
+                guard let modelPointCoordinate = parseResult.coordinate else {
                     print("🎯 Onboarding demo: no element to point at")
                     return
                 }
 
                 let screenshotWidth = CGFloat(cursorScreenCapture.screenshotWidthInPixels)
                 let screenshotHeight = CGFloat(cursorScreenCapture.screenshotHeightInPixels)
+                let pointCoordinate = screenshotPixelCoordinate(
+                    from: modelPointCoordinate,
+                    isInThousandths: !HybridSettings.shared.hasClaudeAPIKey && localModelAnswersInThousandths,
+                    screenshotWidth: screenshotWidth,
+                    screenshotHeight: screenshotHeight
+                )
                 let displayWidth = CGFloat(cursorScreenCapture.displayWidthInPoints)
                 let displayHeight = CGFloat(cursorScreenCapture.displayHeightInPoints)
                 let displayFrame = cursorScreenCapture.displayFrame

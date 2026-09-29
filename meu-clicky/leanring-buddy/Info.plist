@@ -11,7 +11,7 @@
 	<key>VoiceTranscriptionProvider</key>
 	<string>apple</string>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>O agente do Clicky usa isso para criar lembretes, eventos e notas quando você pede.</string>
+	<string>O Clicky usa isso para tocar música no Spotify e para o agente criar lembretes, eventos e notas quando você pede.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>O Clicky usa o microfone para você conversar com ele.</string>
 	<key>NSScreenCaptureUsageDescription</key>

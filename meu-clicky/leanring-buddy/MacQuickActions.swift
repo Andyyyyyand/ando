@@ -114,6 +114,50 @@ enum MacQuickActions {
         NSWorkspace.shared.open(searchURL)
     }
 
+    // MARK: - Spotify
+
+    /// Playback commands Spotify's AppleScript dictionary understands.
+    static let spotifyControlCommands: [String: String] = [
+        "play": "play",
+        "pause": "pause",
+        "next": "next track",
+        "previous": "previous track"
+    ]
+
+    /// Plays the top Spotify search result for the query (e.g. "because of
+    /// you cale"). A "spotify:search:" URI passed to `play track` plays the
+    /// first hit, so no Spotify account API or login is needed.
+    static func playSpotifySearch(query: String) throws {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty else {
+            throw MacQuickActionError.invalidParameters("Busca de música vazia")
+        }
+        try runAppleScript(spotifyLaunchIfNeededScript + """
+        tell application "Spotify" to play track "spotify:search:\(escapeForAppleScript(trimmedQuery))"
+        """)
+    }
+
+    /// play / pause / next / previous on whatever Spotify has loaded.
+    static func controlSpotify(command: String) throws {
+        guard let appleScriptCommand = spotifyControlCommands[command.lowercased()] else {
+            throw MacQuickActionError.invalidParameters("Comando do Spotify desconhecido: \(command)")
+        }
+        try runAppleScript(spotifyLaunchIfNeededScript + """
+        tell application "Spotify" to \(appleScriptCommand)
+        """)
+    }
+
+    /// Spotify ignores playback commands for a moment after launching, so a
+    /// cold start waits a few seconds first.
+    // ponytail: fixed 3s wait blocks the main thread on a cold start only; poll `player state` if that ever feels slow.
+    private static let spotifyLaunchIfNeededScript = """
+    if application "Spotify" is not running then
+        tell application "Spotify" to launch
+        delay 3
+    end if
+
+    """
+
     // MARK: - Helpers
 
     /// AppleScript's `date "..."` parsing depends on the system locale, so

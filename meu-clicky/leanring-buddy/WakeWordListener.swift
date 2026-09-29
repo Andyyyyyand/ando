@@ -62,6 +62,13 @@ final class WakeWordListener {
         }
     }
 
+    /// Releases the microphone and recognizer right away. Push-to-talk calls
+    /// this on key-down: waiting for the next supervision tick left both
+    /// recognizers running together, and push-to-talk got "No speech detected".
+    func pauseListeningNow() {
+        stopListening()
+    }
+
     func stopEverything() {
         supervisionTimer?.invalidate()
         supervisionTimer = nil

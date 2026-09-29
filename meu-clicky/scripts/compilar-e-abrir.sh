@@ -5,8 +5,10 @@
 # Usa assinatura "ad-hoc" (local), então não precisa configurar Apple ID
 # nem Team. O "hardened runtime" fica desligado porque, com assinatura
 # ad-hoc, ele impede o app de carregar os frameworks embutidos (Sparkle)
-# e o app fecha logo ao abrir. Limitação do macOS: a cada nova compilação as permissões
-# (tela, acessibilidade, microfone) precisam ser liberadas de novo.
+# e o app fecha logo ao abrir. Com assinatura ad-hoc, a cada nova compilação as
+# permissões (tela, acessibilidade, microfone) precisam ser liberadas de novo;
+# se existir o certificado local "Meu Clicky Local", ele é usado e as
+# permissões continuam valendo.
 #
 # Uso:  bash scripts/compilar-e-abrir.sh
 #
@@ -52,12 +54,21 @@ cd "$PROJECT_DIR"
 BUILD_LOG="$BUILD_DIR/build.log"
 mkdir -p "$BUILD_DIR"
 
+# Com o certificado local "Meu Clicky Local" no Keychain, a assinatura fica
+# igual entre compilações e o macOS mantém as permissões. Sem ele, ad-hoc
+# ("-"): funciona, mas as permissões somem a cada compilação.
+SIGNING_IDENTITY="-"
+if security find-identity -v -p codesigning 2>/dev/null | grep -q '"Meu Clicky Local"'; then
+    SIGNING_IDENTITY="Meu Clicky Local"
+fi
+echo "Assinatura: $SIGNING_IDENTITY"
+
 if ! xcodebuild \
     -project leanring-buddy.xcodeproj \
     -scheme leanring-buddy \
     -configuration Release \
     -derivedDataPath "$BUILD_DIR/DerivedData" \
-    CODE_SIGN_IDENTITY="-" \
+    CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \
     CODE_SIGN_STYLE=Manual \
     DEVELOPMENT_TEAM="" \
     PROVISIONING_PROFILE_SPECIFIER="" \

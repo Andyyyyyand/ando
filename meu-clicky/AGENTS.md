@@ -11,6 +11,8 @@
 > - Pointing: `AccessibilityElementCollector` lists the frontmost app's clickable elements with exact frames; models answer with `[ELEMENT:n]`, falling back to `[POINT:x,y]`.
 > - Text-to-speech: Kokoro via a local mlx-audio server (`LocalSpeechOutput`), macOS voice as fallback.
 > - Agents: saying "agente, ..." routes to `AgentCoordinator` — quick Mac actions via the local model + AppleScript (`MacQuickActions`), heavy tasks via the Claude Code CLI (`ClaudeCodeAgentRunner`).
+> - Talk-mode actions: answers can carry `[OPEN_APP:]`, `[OPEN_URL:]`, `[SPOTIFY_PLAY:search]` and `[SPOTIFY_CONTROL:play|pause|next|previous]` tags, run via `MacQuickActions` (Spotify through AppleScript `play track "spotify:search:..."`). Questions about pointing or acting on screen are routed to Claude.
+> - `scripts/compilar-e-abrir.sh` signs with the local "Meu Clicky Local" certificate when it exists in the Keychain, so macOS permissions survive rebuilds (ad-hoc otherwise).
 > - PostHog analytics and the email gate are disabled. Setup: `scripts/instalar-meu-clicky.sh` and the Portuguese `README.md`.
 >
 > The sections below describe the original architecture; where they mention the Worker, AssemblyAI or ElevenLabs, the hybrid components above replace them.
