@@ -171,12 +171,20 @@ final class WakeWordListener {
         recognitionTask = speechRecognizer.recognitionTask(with: newRecognitionRequest) { [weak self] result, error in
             let transcriptText = result?.bestTranscription.formattedString
             let isFinalResult = result?.isFinal ?? false
-            let didFail = error != nil
+            let recognitionError = error.map { $0 as NSError }
             Task { @MainActor in
-                self?.handleRecognitionUpdate(
+                guard let self else { return }
+                // A cancelled session still reports an error. Acting on it
+                // would restart (and cancel) the fresh session in a loop,
+                // so only the current session's updates count.
+                guard self.recognitionRequest === newRecognitionRequest else { return }
+                if let recognitionError {
+                    print("👂 Wake word session ended: \(recognitionError.domain) \(recognitionError.code) \(recognitionError.localizedDescription)")
+                }
+                self.handleRecognitionUpdate(
                     transcriptText: transcriptText,
                     isFinalResult: isFinalResult,
-                    didFail: didFail
+                    didFail: recognitionError != nil
                 )
             }
         }
