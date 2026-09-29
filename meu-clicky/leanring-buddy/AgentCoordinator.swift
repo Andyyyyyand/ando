@@ -35,6 +35,12 @@ struct AgentTaskRecord: Identifiable {
     let id = UUID()
     let taskText: String
     let startedAt = Date()
+    /// Short friendly name shown in the home list ("Pesquisador", "Agenda").
+    var agentName: String
+    /// False until the user opens the panel after the task finished; drives
+    /// the blue unread dot and the notch badge.
+    var hasBeenSeen = false
+    var finishedAt: Date?
     /// Nil while the request is still being classified.
     var kind: AgentTaskKind?
     var status: AgentTaskStatus = .running
@@ -48,6 +54,18 @@ final class AgentCoordinator: ObservableObject {
 
     var runningTaskCount: Int {
         tasks.filter { $0.status == .running }.count
+    }
+
+    /// Running tasks plus finished ones the user hasn't looked at yet.
+    var attentionCount: Int {
+        tasks.filter { $0.status == .running || !$0.hasBeenSeen }.count
+    }
+
+    /// Called when the panel opens: finished results count as seen.
+    func markFinishedTasksSeen() {
+        for taskIndex in tasks.indices where tasks[taskIndex].status != .running {
+            tasks[taskIndex].hasBeenSeen = true
+        }
     }
 
     private let localVisionModelClient: LocalVisionModelClient
@@ -99,7 +117,7 @@ final class AgentCoordinator: ObservableObject {
     // MARK: - Running tasks
 
     func startAgentTask(taskText: String) {
-        let newTask = AgentTaskRecord(taskText: taskText)
+        let newTask = AgentTaskRecord(taskText: taskText, agentName: Self.fallbackAgentName(for: taskText))
         tasks.insert(newTask, at: 0)
         // Keep the panel list short.
         if tasks.count > 8 {
@@ -117,6 +135,8 @@ final class AgentCoordinator: ObservableObject {
         updateTask(taskID) { task in
             if task.status == .running {
                 task.status = .cancelled
+                task.hasBeenSeen = true
+                task.finishedAt = Date()
                 task.logLines.append("⏹️ Cancelado")
             }
         }
@@ -139,6 +159,12 @@ final class AgentCoordinator: ObservableObject {
             do {
                 let actionJSON = try await classifyQuickAction(taskText: taskText)
                 let actionName = actionJSON["action"] as? String ?? "heavy"
+                if let suggestedAgentName = (actionJSON["name"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !suggestedAgentName.isEmpty {
+                    updateTask(taskID) { $0.agentName = String(suggestedAgentName.prefix(24)) }
+                } else if let quickActionAgentName = Self.quickActionAgentNames[actionName] {
+                    updateTask(taskID) { $0.agentName = quickActionAgentName }
+                }
                 if actionName != "heavy" {
                     updateTask(taskID) { $0.kind = .quickMacAction }
                     appendLog(taskID, "⚡️ Ação rápida: \(actionName)")
@@ -280,7 +306,7 @@ final class AgentCoordinator: ObservableObject {
         {"action":"open_url","url":"...","confirmation":"..."}
         {"action":"open_path","path":"caminho de pasta ou arquivo, pode começar com ~ (ex.: ~/Downloads)","confirmation":"..."}
         {"action":"web_search","query":"...","confirmation":"..."}
-        {"action":"heavy"}
+        {"action":"heavy","name":"apelido curto e simpático de 1 ou 2 palavras para o agente que fará a tarefa, ex.: Pesquisador, Rascunho, Radar de Mercado"}
 
         Use "heavy" para qualquer coisa que exija pesquisar e resumir informações, escrever textos longos, organizar várias notas ou arquivos, criar programas ou apps, ou mais de uma etapa. Use "heavy" também para tudo que envolva Gmail/e-mail, Google Agenda/Calendar, Notion ou Linear. Na dúvida, use "heavy".
         A confirmação deve ser em português do Brasil, minúsculas, curta e natural, por exemplo "pronto, criei o lembrete para amanhã às nove".
@@ -327,7 +353,29 @@ final class AgentCoordinator: ObservableObject {
         updateTask(taskID) { task in
             task.status = succeeded ? .completed : .failed
             task.summary = summary
+            task.finishedAt = Date()
+            task.hasBeenSeen = false
         }
+    }
+
+    private static let quickActionAgentNames: [String: String] = [
+        "create_reminder": "Lembretes",
+        "create_event": "Agenda",
+        "create_note": "Notas",
+        "open_app": "Apps",
+        "open_url": "Navegador",
+        "open_path": "Arquivos",
+        "web_search": "Busca"
+    ]
+
+    /// First words of the request, used until the model suggests a name.
+    private static func fallbackAgentName(for taskText: String) -> String {
+        let firstWords = taskText
+            .split(whereSeparator: { $0.isWhitespace })
+            .prefix(3)
+            .joined(separator: " ")
+        let capitalizedFirstWords = firstWords.prefix(1).uppercased() + firstWords.dropFirst()
+        return capitalizedFirstWords.isEmpty ? "Agente" : capitalizedFirstWords
     }
 
     /// Asked when the first heavy task starts, so the permission prompt is

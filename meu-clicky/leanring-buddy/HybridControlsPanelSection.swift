@@ -15,6 +15,10 @@ struct HybridControlsPanelSection: View {
     @ObservedObject var hybridSettings: HybridSettings
     @ObservedObject var agentCoordinator: AgentCoordinator
 
+    /// On the home panel's settings screen: show every setting at once and
+    /// leave the agent list to the home screen.
+    var isSettingsScreen: Bool = false
+
     @State private var isShowingAdvancedSettings = false
     @State private var claudeAPIKeyInput = ""
     @State private var isLocalModelOnline: Bool?
@@ -38,14 +42,18 @@ struct HybridControlsPanelSection: View {
                     .foregroundColor(DS.Colors.textTertiary)
             }
 
-            if !agentCoordinator.tasks.isEmpty {
+            if !isSettingsScreen && !agentCoordinator.tasks.isEmpty {
                 agentTasksSection
             }
 
-            advancedSettingsToggle
-
-            if isShowingAdvancedSettings {
+            if isSettingsScreen {
                 advancedSettingsContent
+            } else {
+                advancedSettingsToggle
+
+                if isShowingAdvancedSettings {
+                    advancedSettingsContent
+                }
             }
         }
         .onAppear {

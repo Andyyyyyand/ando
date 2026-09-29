@@ -93,6 +93,9 @@ Worker vars: `ELEVENLABS_VOICE_ID`
 | `MacQuickActions.swift` | ~150 | Reminders, Calendar, Notes (AppleScript), open app/URL, web search. |
 | `ClaudeCodeAgentRunner.swift` | ~195 | Runs `claude -p` with stream-json in `~/ClickyAgente` and streams its progress. |
 | `DictationTextInserter.swift` | ~70 | Dictation mode (ctrl+option+shift): pastes text into the focused app and restores the clipboard. |
+| `ClickyHomePanelView.swift` | ~330 | Home panel after setup: agents listed like conversations, tips row, glossy footer pills, gear swaps to settings. |
+| `ClickyHomeDesign.swift` | ~190 | Home look: glossy pill button style, pastel buddy avatars, time labels. |
+| `NotchIslandWindowManager.swift` | ~170 | Black island around the notch with the agent badge and the blue triangle; click opens the panel. |
 | `HybridControlsPanelSection.swift` | ~420 | Panel UI: brain mode, Claude model, API key, service status, voice, agent tasks. |
 | `worker/src/index.ts` | ~142 | Cloudflare Worker proxy. Three routes: `/chat` (Claude), `/tts` (ElevenLabs), `/transcribe-token` (AssemblyAI temp token). |
 

@@ -37,15 +37,24 @@ final class MenuBarPanelManager: NSObject {
     private var panelContentSizeObserver: NSObjectProtocol?
     private var agentActivityCancellable: AnyCancellable?
     private var isShowingAgentActivityDot = false
+    /// Black island around the notch (MacBooks with a notch only).
+    private var notchIslandWindowManager: NotchIslandWindowManager?
 
     private let companionManager: CompanionManager
-    private let panelWidth: CGFloat = 320
+    private let panelWidth: CGFloat = ClickyHomeStyle.panelWidth
     private let panelHeight: CGFloat = 380
 
     init(companionManager: CompanionManager) {
         self.companionManager = companionManager
         super.init()
         createStatusItem()
+
+        notchIslandWindowManager = NotchIslandWindowManager(
+            companionManager: companionManager,
+            onIslandClicked: { [weak self] in
+                self?.statusItemClicked()
+            }
+        )
 
         dismissPanelObserver = NotificationCenter.default.addObserver(
             forName: .clickyDismissPanel,

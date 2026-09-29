@@ -14,6 +14,19 @@ struct CompanionPanelView: View {
     @ObservedObject var companionManager: CompanionManager
 
     var body: some View {
+        if companionManager.hasCompletedOnboarding && companionManager.allPermissionsGranted {
+            ClickyHomePanelView(
+                companionManager: companionManager,
+                hybridSettings: HybridSettings.shared,
+                agentCoordinator: companionManager.agentCoordinator
+            )
+        } else {
+            setupPanel
+        }
+    }
+
+    /// First-run and missing-permissions layout.
+    private var setupPanel: some View {
         VStack(alignment: .leading, spacing: 0) {
             panelHeader
             Divider()
@@ -72,7 +85,7 @@ struct CompanionPanelView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
         }
-        .frame(width: 320)
+        .frame(width: ClickyHomeStyle.panelWidth)
         .background(panelBackground)
     }
 
