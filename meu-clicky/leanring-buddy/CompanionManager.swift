@@ -635,13 +635,16 @@ final class CompanionManager: ObservableObject {
     if pointing wouldn't help, append [POINT:none].
 
     opening things:
-    you can open apps and web pages on the user's mac. when the user asks you to open, launch or go to something, add [OPEN_APP:exact macos app name] (e.g. [OPEN_APP:Spotify], [OPEN_APP:System Settings]) or [OPEN_URL:full url] (e.g. [OPEN_URL:https://youtube.com]). put these action tags right after your spoken text and BEFORE the pointing tag, and confirm briefly out loud, like "abrindo o spotify". never read the tags aloud.
+    you can open apps and web pages on the user's mac. when the user asks you to open, launch or go to something, add [OPEN_APP:exact macos app name] (e.g. [OPEN_APP:Spotify], [OPEN_APP:System Settings]) or [OPEN_URL:full url] (e.g. [OPEN_URL:https://youtube.com]). to close (quit) an app, add [CLOSE_APP:exact name as shown in the menu bar] (e.g. [CLOSE_APP:Spotify]); it quits like command q, so apps with unsaved work still ask first. put these action tags right after your spoken text and BEFORE the pointing tag, and confirm briefly out loud, like "abrindo o spotify" or "fechando o spotify". never read the tags aloud.
 
     music:
     you control spotify directly. to play a specific song, artist, album or playlist, add [SPOTIFY_PLAY:song name and artist] (e.g. [SPOTIFY_PLAY:because of you cale]); it plays the top search result. if the user says "essa música" or "essa aqui", read the song and artist from the screen. to control what is already loaded, add [SPOTIFY_CONTROL:play], [SPOTIFY_CONTROL:pause], [SPOTIFY_CONTROL:next] or [SPOTIFY_CONTROL:previous]. after a music tag add [POINT:none] — don't point at spotify's buttons, the music tag already does it. confirm briefly, like "tocando because of you".
 
+    handing off to the agent:
+    you also have a background agent that can do real work on the mac: create reminders, calendar events and notes, write or organize files, run tasks in the terminal, use the user's connected services. when the user asks you to DO something that the tags above can't do (not just show where it is), add [AGENT:a clear, complete description of the task in portuguese] and say briefly that you're passing it to the agent, like "vou pedir pro agente fazer isso". the agent works in the background and reports back when done. don't use it for questions, explanations or "where is x".
+
     what you can and can't do:
-    the only things you actually do on the mac are the action tags above (open apps and links, control spotify). you cannot click, type, scroll or press buttons for the user. for anything else, never say you did it ("pronto", "cliquei", "dando play") — tell the user where to click and point at it.
+    the only things you do yourself are the action tags above (open and close apps, open links, control spotify, hand off to the agent). you cannot click, type, scroll or press buttons for the user. never say something is done ("pronto", "cliquei", "dando play") unless a tag did it; for a hand-off say the agent will do it, not that it's done.
 
     examples:
     - user asks how to color grade in final cut and the list has "[12] button "Color Inspector"": "abre o inspetor de cor, ele fica ali no canto de cima da barra de ferramentas. clica nele e aparecem as rodas de cor e as curvas. [ELEMENT:12:inspetor de cor]"
@@ -661,9 +664,10 @@ final class CompanionManager: ObservableObject {
         - [POINT:x,y:label] with screenshot pixel coordinates if it is not in the list.
         - [POINT:none] if pointing doesn't help.
 
-        to open an app or website the user asks for, add [OPEN_APP:exact macos app name] or [OPEN_URL:full url] before the pointing tag.
+        to open an app or website the user asks for, add [OPEN_APP:exact macos app name] or [OPEN_URL:full url] before the pointing tag. to close an app add [CLOSE_APP:app name].
         to play music add [SPOTIFY_PLAY:song and artist]; to control playback add [SPOTIFY_CONTROL:play], [SPOTIFY_CONTROL:pause], [SPOTIFY_CONTROL:next] or [SPOTIFY_CONTROL:previous]. then add [POINT:none].
-        you cannot click or type for the user. never say you did something except opening apps, links or controlling spotify; say where to click instead.
+        to have something done that these tags can't do (reminders, files, notes, terminal tasks), add [AGENT:full task description in portuguese] and say you're passing it to the agent.
+        you cannot click or type for the user. never say something is done unless a tag did it; say where to click instead.
         """
         if canEscalateToClaude {
             localPrompt += """
@@ -801,16 +805,18 @@ final class CompanionManager: ObservableObject {
 
     enum SpokenAnswerAction {
         case openApplication(applicationName: String)
+        case quitApplication(applicationName: String)
         case openURL(urlString: String)
         case playSpotifySearch(searchQuery: String)
         case controlSpotify(command: String)
+        case handOffToAgent(taskText: String)
     }
 
     /// Pulls [OPEN_APP:name], [OPEN_URL:url], [SPOTIFY_PLAY:song] and
     /// [SPOTIFY_CONTROL:command] tags out of an answer. They let the
     /// talk-mode brain actually do these things instead of only pointing.
     static func extractSpokenAnswerActions(from responseText: String) -> (textWithoutActions: String, actions: [SpokenAnswerAction]) {
-        let pattern = #"\[(OPEN_APP|OPEN_URL|SPOTIFY_PLAY|SPOTIFY_CONTROL):\s*([^\]]+?)\s*\]"#
+        let pattern = #"\[(OPEN_APP|CLOSE_APP|OPEN_URL|SPOTIFY_PLAY|SPOTIFY_CONTROL|AGENT):\s*([^\]]+?)\s*\]"#
         guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
             return (responseText, [])
         }
@@ -824,10 +830,14 @@ final class CompanionManager: ObservableObject {
             switch responseText[kindRange] {
             case "OPEN_APP":
                 actions.append(.openApplication(applicationName: actionValue))
+            case "CLOSE_APP":
+                actions.append(.quitApplication(applicationName: actionValue))
             case "SPOTIFY_PLAY":
                 actions.append(.playSpotifySearch(searchQuery: actionValue))
             case "SPOTIFY_CONTROL":
                 actions.append(.controlSpotify(command: actionValue))
+            case "AGENT":
+                actions.append(.handOffToAgent(taskText: actionValue))
             default:
                 actions.append(.openURL(urlString: actionValue))
             }
@@ -846,6 +856,9 @@ final class CompanionManager: ObservableObject {
                 case .openApplication(let applicationName):
                     try MacQuickActions.openApplication(named: applicationName)
                     print("🚀 Opened app: \(applicationName)")
+                case .quitApplication(let applicationName):
+                    try MacQuickActions.quitApplication(named: applicationName)
+                    print("🚪 Quit app: \(applicationName)")
                 case .openURL(let urlString):
                     try MacQuickActions.openURL(urlString)
                     print("🚀 Opened URL: \(urlString)")
@@ -855,6 +868,11 @@ final class CompanionManager: ObservableObject {
                 case .controlSpotify(let command):
                     try MacQuickActions.controlSpotify(command: command)
                     print("🎵 Spotify: \(command)")
+                case .handOffToAgent(let taskText):
+                    // Same background agent as saying "agente, ...": it runs
+                    // with the panel's permission toggles and reports back.
+                    agentCoordinator.startAgentTask(taskText: taskText)
+                    print("🤖 Handed off to agent: \(taskText)")
                 }
             } catch {
                 print("⚠️ Could not perform action: \(error.localizedDescription)")

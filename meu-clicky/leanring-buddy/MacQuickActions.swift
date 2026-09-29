@@ -85,6 +85,26 @@ enum MacQuickActions {
         }
     }
 
+    /// Quits a running app the normal way (like ⌘Q), so apps with unsaved
+    /// work still ask before closing. Never quits Clicky itself.
+    static func quitApplication(named applicationName: String) throws {
+        let normalizedApplicationName = applicationName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !normalizedApplicationName.isEmpty else {
+            throw MacQuickActionError.invalidParameters("Nome do app vazio")
+        }
+        let matchingApplications = NSWorkspace.shared.runningApplications.filter { runningApplication in
+            runningApplication.activationPolicy == .regular
+                && runningApplication.bundleIdentifier != Bundle.main.bundleIdentifier
+                && runningApplication.localizedName?.lowercased() == normalizedApplicationName
+        }
+        guard !matchingApplications.isEmpty else {
+            throw MacQuickActionError.invalidParameters("O app \(applicationName) não está aberto")
+        }
+        for runningApplication in matchingApplications {
+            runningApplication.terminate()
+        }
+    }
+
     static func openURL(_ urlString: String) throws {
         var normalizedURLString = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
         if !normalizedURLString.lowercased().hasPrefix("http") {
