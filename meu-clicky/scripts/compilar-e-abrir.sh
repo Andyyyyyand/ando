@@ -3,7 +3,9 @@
 # Compila o Meu Clicky pelo Terminal (sem abrir o Xcode) e abre o app.
 #
 # Usa assinatura "ad-hoc" (local), então não precisa configurar Apple ID
-# nem Team. Limitação do macOS: a cada nova compilação as permissões
+# nem Team. O "hardened runtime" fica desligado porque, com assinatura
+# ad-hoc, ele impede o app de carregar os frameworks embutidos (Sparkle)
+# e o app fecha logo ao abrir. Limitação do macOS: a cada nova compilação as permissões
 # (tela, acessibilidade, microfone) precisam ser liberadas de novo.
 #
 # Uso:  bash scripts/compilar-e-abrir.sh
@@ -59,6 +61,7 @@ if ! xcodebuild \
     CODE_SIGN_STYLE=Manual \
     DEVELOPMENT_TEAM="" \
     PROVISIONING_PROFILE_SPECIFIER="" \
+    ENABLE_HARDENED_RUNTIME=NO \
     build > "$BUILD_LOG" 2>&1; then
     echo
     echo "Erros encontrados:"
