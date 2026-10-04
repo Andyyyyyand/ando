@@ -353,6 +353,32 @@
       if (titulo && e.target === titulo.querySelector(".letra:last-of-type") ) titulo.classList.remove("onda");
     }
   });
+  // Visit counter (GoatCounter: free, no cookies, no personal data). Off until cfg.analytics is set.
+  // Only which practice was opened and which category was chosen are counted; search text is never sent.
+  if (cfg.analytics) {
+    const contador = document.createElement("script");
+    contador.async = true;
+    contador.dataset.goatcounter = `https://${cfg.analytics}.goatcounter.com/count`;
+    contador.src = "https://gc.zgo.at/count.js";
+    document.head.append(contador);
+  }
+  function contar(tipo, nome) {
+    if (cfg.analytics && window.goatcounter && window.goatcounter.count) {
+      window.goatcounter.count({ path: tipo + "/" + nome, title: nome, event: true });
+    }
+  }
+  document.addEventListener("toggle", (e) => {
+    const d = e.target;
+    if (d.tagName === "DETAILS" && d.open) {
+      const titulo = d.closest(".card") && d.closest(".card").querySelector("h3");
+      if (titulo) contar("pratica", titulo.getAttribute("aria-label") || titulo.textContent);
+    }
+  }, true);
+  $("filtros").addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (chip) contar("categoria", chip.textContent);
+  });
+
   renderAtalhos();
   $("busca").addEventListener("input", renderLista);
   $("busca").addEventListener("focus", () => renderSugestoes(praticasEncontradas()));

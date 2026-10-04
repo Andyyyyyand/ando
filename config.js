@@ -11,6 +11,11 @@ window.CONFIG = {
   // Instagram do projeto. Enquanto estiver vazio, o rodapé mostra "Instagram: em breve!".
   instagram: "",
 
+  // Contador de visitas (GoatCounter, grátis e sem cookies). Coloque só o código
+  // escolhido no cadastro: se o endereço for https://meusite.goatcounter.com, o código é "meusite".
+  // Enquanto estiver vazio, nada é contado.
+  analytics: "",
+
   // Atalhos que aparecem embaixo da busca: [texto do botão, palavras buscadas].
   atalhosBusca: [
     ["Não fica sentado", "fica sentado"],
