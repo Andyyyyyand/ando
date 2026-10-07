@@ -58,6 +58,10 @@ O site lê esta planilha: https://docs.google.com/spreadsheets/d/1BKKcSiljjIs0mU
 
 Ela precisa estar compartilhada como **Qualquer pessoa com o link → Leitor**. As colunas são: Título da prática, Categoria, Para quem é, Situação, Estratégia (um passo por linha), Materiais, Tempo e Foto (link, opcional).
 
+## Modo diurno e noturno
+
+O site abre no tema do celular. O botão sol/lua no canto superior direito troca na hora, e a escolha fica salva naquele aparelho. As cores de texto foram conferidas nos dois modos (contraste mínimo de 4,5:1, padrão WCAG AA).
+
 ## Contadores (visitas, leituras e "acompanhe")
 
 Usa o GoatCounter (grátis, sem cookies, sem dados pessoais). Fica desligado até o campo `analytics` do `config.js` receber o código escolhido no cadastro em goatcounter.com.

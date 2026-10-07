@@ -19,6 +19,7 @@
   };
   const PALETA = ["--c-ceu", "--c-sol", "--c-tangerina", "--c-lilas", "--c-coral", "--c-menta", "--c-rosa", "--c-turquesa"];
   const coresExtras = {};
+  const estiloCor = (categoria) => `--cor: ${corDa(categoria)}; --cor-ink: ${corDa(categoria).replace(/\)$/, "-ink)")}`;
   function corDa(categoria) {
     const chave = normalizar(categoria);
     if (CORES_FIXAS[chave]) return `var(${CORES_FIXAS[chave]})`;
@@ -225,7 +226,7 @@
 
   function cartao(p) {
     const passos = p.estrategia.split(/\n+/).map((s) => s.trim()).filter(Boolean);
-    return el("article", { class: "card", id: "pratica-" + praticas.indexOf(p), "data-titulo": p.titulo, style: `--cor: ${corDa(p.categoria)}` },
+    return el("article", { class: "card", id: "pratica-" + praticas.indexOf(p), "data-titulo": p.titulo, style: estiloCor(p.categoria) },
       p.foto ? el("img", { class: "card-foto", src: p.foto, alt: p.titulo, loading: "lazy" }) : null,
       el("div", { class: "card-topo" },
         el("span", { class: "tag" }, p.categoria || "Geral"),
@@ -248,7 +249,7 @@
     const cats = ["Todas", ...new Set(praticas.map((p) => p.categoria).filter(Boolean))];
     $("filtros").replaceChildren(...cats.map((c) => {
       const attrs = { class: "chip", type: "button", "aria-pressed": String(c === categoriaAtiva) };
-      if (c !== "Todas") attrs.style = `--cor: ${corDa(c)}`;
+      if (c !== "Todas") attrs.style = estiloCor(c);
       const b = el("button", attrs, c);
       b.onclick = () => { categoriaAtiva = c; renderFiltros(); renderLista(); };
       return b;
@@ -314,7 +315,7 @@
     if (!aberto) { fecharSugestoes(); return; }
 
     const linhas = itens.slice(0, 5).map((p) => {
-      const b = el("button", { type: "button", class: "sugestao", role: "option", style: `--cor: ${corDa(p.categoria)}` },
+      const b = el("button", { type: "button", class: "sugestao", role: "option", style: estiloCor(p.categoria) },
         el("span", { class: "sugestao-titulo" }, p.titulo),
         el("span", { class: "sugestao-info" }, p.categoria + (p.situacao ? " · " + p.situacao : "")));
       b.addEventListener("click", () => abrirPratica(p));
@@ -472,6 +473,26 @@
   });
 
   iniciarAcompanhe();
+
+  // Day / night toggle. Starts from the phone's setting; a choice is remembered on this device.
+  (function iniciarTema() {
+    const raiz = document.documentElement, botao = $("tema");
+    const escuroAgora = () => (raiz.dataset.theme ? raiz.dataset.theme === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const pintar = () => {
+      const escuro = escuroAgora();
+      botao.dataset.modo = escuro ? "dark" : "light";
+      botao.setAttribute("aria-label", escuro ? "Mudar para o modo diurno" : "Mudar para o modo noturno");
+    };
+    botao.addEventListener("click", () => {
+      const novo = escuroAgora() ? "light" : "dark";
+      raiz.setAttribute("data-theme", novo);
+      try { localStorage.setItem("pi-tema", novo); } catch (e) { /* storage blocked */ }
+      pintar();
+    });
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", pintar);
+    new MutationObserver(pintar).observe(raiz, { attributes: true, attributeFilter: ["data-theme"] });
+    pintar();
+  })();
 
   renderAtalhos();
   $("busca").addEventListener("input", renderLista);
