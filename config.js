@@ -13,7 +13,8 @@ window.CONFIG = {
 
   // Contador de visitas (GoatCounter, grátis e sem cookies). Coloque só o código
   // escolhido no cadastro: se o endereço for https://meusite.goatcounter.com, o código é "meusite".
-  // Enquanto estiver vazio, nada é contado.
+  // Enquanto estiver vazio, nada é contado e a parte "Acompanhe o projeto" fica escondida.
+  // No GoatCounter, ligue também: Settings > "Allow adding visitor counts on your website".
   analytics: "",
 
   // Atalhos que aparecem embaixo da busca: [texto do botão, palavras buscadas].

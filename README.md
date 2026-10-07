@@ -58,6 +58,20 @@ O site lê esta planilha: https://docs.google.com/spreadsheets/d/1BKKcSiljjIs0mU
 
 Ela precisa estar compartilhada como **Qualquer pessoa com o link → Leitor**. As colunas são: Título da prática, Categoria, Para quem é, Situação, Estratégia (um passo por linha), Materiais, Tempo e Foto (link, opcional).
 
+## Contadores (visitas, leituras e "acompanhe")
+
+Usa o GoatCounter (grátis, sem cookies, sem dados pessoais). Fica desligado até o campo `analytics` do `config.js` receber o código escolhido no cadastro em goatcounter.com.
+
+1. Crie a conta em goatcounter.com/signup e escolha o código (ex.: `praticasinclusivas`).
+2. No GoatCounter, abra **Settings** e ligue **Allow adding visitor counts on your website**. Sem isso os números não aparecem no site.
+3. Coloque o código em `analytics` no `config.js`.
+
+Com isso o site passa a mostrar:
+- **Acompanhe o projeto:** botão "Quero acompanhar" (uma vez por navegador), número de pessoas que tocaram e total de visitas.
+- **Olho em cada prática:** quantas pessoas abriram a prática. Só aparece quando o número é maior que zero.
+
+O número de "acompanham" é uma contagem de toques, não uma lista de contatos: não envia e-mail nem notificação, e quem quiser pode tocar de outro aparelho e contar de novo. Nada de texto de busca é enviado.
+
 ## Textos do site
 
 Em `config.js`:

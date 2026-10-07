@@ -318,3 +318,45 @@ details li::before {
   70% { transform: translateY(.04em) rotate(4deg) scale(.95); color: var(--cor-pulo); }
   100% { transform: none; }
 }
+
+/* Olhos: quantas pessoas leram */
+.card-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.olhos { display: inline-flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 700; color: var(--tinta-suave); white-space: nowrap; }
+.olhos[hidden] { display: none; }
+.olhos svg { width: 18px; height: 18px; color: var(--cor); flex: none; }
+.olhos b { font-variant-numeric: tabular-nums; color: var(--tinta); }
+
+/* Acompanhe o projeto */
+.acompanhe {
+  display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px 32px; align-items: center;
+  margin: 72px 0 0; padding: 28px;
+  background: color-mix(in srgb, var(--c-menta) 13%, var(--cartao));
+  border: 2px solid var(--tinta); border-radius: var(--raio); box-shadow: 4px 4px 0 var(--tinta);
+}
+.acompanhe[hidden] { display: none; }
+.acompanhe h2 { margin: 0 0 6px; }
+.acompanhe p { margin: 0 0 16px; max-width: 52ch; color: var(--tinta-suave); }
+.btn-acompanhar {
+  display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+  font: inherit; font-weight: 800; font-size: 17px; padding: 12px 22px; border-radius: 999px;
+  background: var(--c-coral); color: #fff; border: 2px solid var(--tinta); box-shadow: 3px 3px 0 var(--tinta);
+  transition: transform .15s, box-shadow .15s;
+}
+.btn-acompanhar svg { width: 22px; height: 22px; }
+.btn-acompanhar:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--tinta); }
+.btn-acompanhar:disabled { background: var(--c-menta); cursor: default; }
+.acompanhe-numeros { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 20px 36px; justify-content: center; }
+.acompanhe-numeros[hidden], .acompanhe-numeros li[hidden] { display: none; }
+.acompanhe-numeros li { display: grid; gap: 2px; text-align: center; }
+.acompanhe-numeros b {
+  font-family: "Fredoka", "Nunito", system-ui, sans-serif; font-weight: 700; line-height: 1;
+  font-size: clamp(40px, 7vw, 56px); font-variant-numeric: tabular-nums; color: var(--c-coral);
+}
+#bloco-visitas b { color: var(--c-ceu); }
+.acompanhe-numeros span { font-weight: 700; color: var(--tinta-suave); }
+.acompanhe-numeros span svg { width: 18px; height: 18px; vertical-align: -3px; }
+@media (max-width: 700px) {
+  .acompanhe { grid-template-columns: minmax(0, 1fr); padding: 22px 18px; }
+  .acompanhe-numeros { justify-content: flex-start; }
+  .acompanhe-numeros li { text-align: left; }
+}

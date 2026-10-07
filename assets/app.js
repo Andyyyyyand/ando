@@ -141,11 +141,91 @@
     if (observadorOnda && !semAnimacao) observadorOnda.observe(titulo);
   }
 
+  // ---- Public counters (read from GoatCounter; needs "Allow adding visitor counts on your website") ----
+  const caminhoDaPratica = (titulo) => "/pratica/" + titulo;
+  const CAMINHO_ACOMPANHAR = "/acompanhar";
+  const cacheContagem = new Map();
+  let filaContagem = Promise.resolve();
+
+  // Reads one count, one request at a time. Resolves to a number, or null when unknown.
+  function lerContagem(caminho) {
+    if (!cfg.analytics) return Promise.resolve(null);
+    if (cacheContagem.has(caminho)) return cacheContagem.get(caminho);
+    const url = `https://${cfg.analytics}.goatcounter.com/counter/${encodeURIComponent(caminho)}.json`;
+    const pedido = filaContagem = filaContagem.then(() =>
+      fetch(url)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => (j && j.count != null ? parseInt(String(j.count).replace(/\D/g, ""), 10) || 0 : null))
+        .catch(() => null));
+    cacheContagem.set(caminho, pedido);
+    return pedido;
+  }
+
+  const formatar = (n) => n.toLocaleString("pt-BR");
+
+  const observadorOlhos = cfg.analytics && "IntersectionObserver" in window ? new IntersectionObserver((entradas) => {
+    entradas.forEach((e) => {
+      if (!e.isIntersecting) return;
+      observadorOlhos.unobserve(e.target);
+      const olho = e.target.querySelector(".olhos");
+      if (!olho) return;
+      lerContagem(olho.dataset.caminho).then((n) => {
+        if (n > 0) { olho.querySelector("b").textContent = formatar(n); olho.hidden = false; }
+      });
+    });
+  }, { rootMargin: "200px" }) : null;
+
+  function iniciarAcompanhe() {
+    if (!cfg.analytics) return;
+    $("acompanhe").hidden = false;
+
+    let jaAcompanha = false;
+    try { jaAcompanha = localStorage.getItem("pi-acompanha") === "1"; } catch (e) { /* storage blocked */ }
+    let totalAcompanham = null;
+
+    const pintar = () => {
+      const botao = $("btn-acompanhar");
+      botao.setAttribute("aria-pressed", String(jaAcompanha));
+      botao.disabled = jaAcompanha;
+      $("rotulo-acompanhar").textContent = jaAcompanha ? "Você já acompanha ✓" : "Quero acompanhar";
+      const mostrar = totalAcompanham > 0;
+      $("bloco-acompanham").hidden = !mostrar;
+      if (mostrar) {
+        $("n-acompanham").textContent = formatar(totalAcompanham);
+        $("leg-acompanham").textContent = totalAcompanham === 1 ? "pessoa acompanha" : "pessoas acompanham";
+      }
+    };
+    pintar();
+
+    $("btn-acompanhar").addEventListener("click", () => {
+      if (jaAcompanha) return;
+      jaAcompanha = true;
+      try { localStorage.setItem("pi-acompanha", "1"); } catch (e) { /* storage blocked */ }
+      registrar(CAMINHO_ACOMPANHAR, "Acompanhar o projeto", false);
+      if (totalAcompanham !== null) totalAcompanham += 1;
+      pintar();
+    });
+
+    lerContagem(CAMINHO_ACOMPANHAR).then((n) => { if (n !== null) { totalAcompanham = n + (jaAcompanha && n === 0 ? 1 : 0); pintar(); } });
+    lerContagem(location.pathname).then((n) => {
+      if (n > 0) { $("n-visitas").textContent = formatar(n); $("bloco-visitas").hidden = false; }
+    });
+  }
+
+  // Eye badge: how many people opened this practice. Stays hidden until a real count above zero is known.
+  function olhosDaPratica(titulo) {
+    const span = el("span", { class: "olhos", hidden: "", title: "Pessoas que leram esta prática", "data-caminho": caminhoDaPratica(titulo) });
+    span.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg><b></b><span class="olhos-texto"> leram</span>';
+    return span;
+  }
+
   function cartao(p) {
     const passos = p.estrategia.split(/\n+/).map((s) => s.trim()).filter(Boolean);
-    return el("article", { class: "card", id: "pratica-" + praticas.indexOf(p), style: `--cor: ${corDa(p.categoria)}` },
+    return el("article", { class: "card", id: "pratica-" + praticas.indexOf(p), "data-titulo": p.titulo, style: `--cor: ${corDa(p.categoria)}` },
       p.foto ? el("img", { class: "card-foto", src: p.foto, alt: p.titulo, loading: "lazy" }) : null,
-      el("span", { class: "tag" }, p.categoria || "Geral"),
+      el("div", { class: "card-topo" },
+        el("span", { class: "tag" }, p.categoria || "Geral"),
+        olhosDaPratica(p.titulo)),
       letrasAnimadas(el("h3", {}, p.titulo)),
       p.publico ? el("p", { class: "publico" }, p.publico) : null,
       p.situacao ? el("p", { class: "situacao" }, el("b", {}, "a situação"), p.situacao) : null,
@@ -216,6 +296,7 @@
     const itens = praticasEncontradas();
     $("lista").replaceChildren(...itens.map(cartao));
     $("lista").querySelectorAll(".card h3").forEach(observarOnda);
+    if (observadorOlhos) $("lista").querySelectorAll(".card").forEach((c) => observadorOlhos.observe(c));
     $("vazio").hidden = itens.length > 0;
     $("contagem").textContent = itens.length === 1 ? "1 prática" : itens.length + " práticas";
     renderSugestoes(itens);
@@ -354,7 +435,8 @@
     }
   });
   // Visit counter (GoatCounter: free, no cookies, no personal data). Off until cfg.analytics is set.
-  // Only which practice was opened and which category was chosen are counted; search text is never sent.
+  // Counted: visits, which practice is opened, which category is chosen, and "Quero acompanhar" taps.
+  // Search text is never sent.
   if (cfg.analytics) {
     const contador = document.createElement("script");
     contador.async = true;
@@ -362,22 +444,30 @@
     contador.src = "https://gc.zgo.at/count.js";
     document.head.append(contador);
   }
-  function contar(tipo, nome) {
+
+  function registrar(caminho, titulo, evento) {
     if (cfg.analytics && window.goatcounter && window.goatcounter.count) {
-      window.goatcounter.count({ path: tipo + "/" + nome, title: nome, event: true });
+      window.goatcounter.count({ path: caminho, title: titulo, event: !!evento });
     }
   }
+
+  const praticasLidas = new Set();
   document.addEventListener("toggle", (e) => {
     const d = e.target;
-    if (d.tagName === "DETAILS" && d.open) {
-      const titulo = d.closest(".card") && d.closest(".card").querySelector("h3");
-      if (titulo) contar("pratica", titulo.getAttribute("aria-label") || titulo.textContent);
+    if (d.tagName !== "DETAILS" || !d.open) return;
+    const card = d.closest(".card");
+    const titulo = card && card.dataset.titulo;
+    if (titulo && !praticasLidas.has(titulo)) {
+      praticasLidas.add(titulo);
+      registrar(caminhoDaPratica(titulo), titulo, false);
     }
   }, true);
   $("filtros").addEventListener("click", (e) => {
     const chip = e.target.closest(".chip");
-    if (chip) contar("categoria", chip.textContent);
+    if (chip) registrar("categoria/" + chip.textContent, chip.textContent, true);
   });
+
+  iniciarAcompanhe();
 
   renderAtalhos();
   $("busca").addEventListener("input", renderLista);
