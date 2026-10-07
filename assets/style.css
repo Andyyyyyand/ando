@@ -320,7 +320,7 @@ details li::before {
 }
 
 /* Olhos: quantas pessoas leram */
-.card-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card-topo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; }
 .olhos { display: inline-flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 700; color: var(--tinta-suave); white-space: nowrap; }
 .olhos[hidden] { display: none; }
 .olhos svg { width: 18px; height: 18px; color: var(--cor); flex: none; }

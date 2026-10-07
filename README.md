@@ -68,7 +68,7 @@ Usa o GoatCounter (grátis, sem cookies, sem dados pessoais). Fica desligado at�
 
 Com isso o site passa a mostrar:
 - **Acompanhe o projeto:** botão "Quero acompanhar" (uma vez por navegador), número de pessoas que tocaram e total de visitas.
-- **Olho em cada prática:** quantas pessoas abriram a prática. Só aparece quando o número é maior que zero.
+- **Olho em cada prática:** "N pessoas visualizaram", contando quem abriu a estratégia. Aparece assim que o GoatCounter responde, mesmo com zero.
 
 O número de "acompanham" é uma contagem de toques, não uma lista de contatos: não envia e-mail nem notificação, e quem quiser pode tocar de outro aparelho e contar de novo. Nada de texto de busca é enviado.
 

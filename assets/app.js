@@ -170,7 +170,11 @@
       const olho = e.target.querySelector(".olhos");
       if (!olho) return;
       lerContagem(olho.dataset.caminho).then((n) => {
-        if (n > 0) { olho.querySelector("b").textContent = formatar(n); olho.hidden = false; }
+        if (n !== null) {
+          olho.querySelector("b").textContent = formatar(n);
+          olho.querySelector(".olhos-texto").textContent = n === 1 ? " pessoa visualizou" : " pessoas visualizaram";
+          olho.hidden = false;
+        }
       });
     });
   }, { rootMargin: "200px" }) : null;
@@ -188,7 +192,7 @@
       botao.setAttribute("aria-pressed", String(jaAcompanha));
       botao.disabled = jaAcompanha;
       $("rotulo-acompanhar").textContent = jaAcompanha ? "Você já acompanha ✓" : "Quero acompanhar";
-      const mostrar = totalAcompanham > 0;
+      const mostrar = totalAcompanham !== null;
       $("bloco-acompanham").hidden = !mostrar;
       if (mostrar) {
         $("n-acompanham").textContent = formatar(totalAcompanham);
@@ -208,14 +212,14 @@
 
     lerContagem(CAMINHO_ACOMPANHAR).then((n) => { if (n !== null) { totalAcompanham = n + (jaAcompanha && n === 0 ? 1 : 0); pintar(); } });
     lerContagem(location.pathname).then((n) => {
-      if (n > 0) { $("n-visitas").textContent = formatar(n); $("bloco-visitas").hidden = false; }
+      if (n !== null) { $("n-visitas").textContent = formatar(n); $("bloco-visitas").hidden = false; }
     });
   }
 
   // Eye badge: how many people opened this practice. Stays hidden until a real count above zero is known.
   function olhosDaPratica(titulo) {
-    const span = el("span", { class: "olhos", hidden: "", title: "Pessoas que leram esta prática", "data-caminho": caminhoDaPratica(titulo) });
-    span.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg><b></b><span class="olhos-texto"> leram</span>';
+    const span = el("span", { class: "olhos", hidden: "", title: "Pessoas que visualizaram esta prática", "data-caminho": caminhoDaPratica(titulo) });
+    span.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg><b></b><span class="olhos-texto"></span>';
     return span;
   }
 
