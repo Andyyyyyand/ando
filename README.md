@@ -71,6 +71,10 @@ Pasta `logos/`, duas opções (o texto já está em curvas, não precisa instala
 
 **Caminhos:** cinco trilhas, cada uma de uma cor, chegam à mesma estrela. **Ciranda:** oito crianças de mãos dadas, uma cor para cada categoria do site, em volta de um coração.
 
+### Mockups (logo escolhida: Ciranda)
+
+Pasta `logos/mockups/`: perfil e post de Instagram, camisetas, ecobag, caderno, cartão de visita e cartaz, mais um quadro com as seis (`00-quadro.png`). São ilustrações para mostrar a ideia, não fotos de produtos reais. O perfil de exemplo não mostra números de seguidores e o nome de usuário não foi verificado no Instagram.
+
 ## Modo diurno e noturno
 
 O site abre no tema do celular. O botão sol/lua no canto superior direito troca na hora, e a escolha fica salva naquele aparelho. As cores de texto foram conferidas nos dois modos (contraste mínimo de 4,5:1, padrão WCAG AA).
