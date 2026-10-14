@@ -69,6 +69,8 @@ Pasta `logos/`, duas opções (o texto já está em curvas, não precisa instala
 | `*-icone.svg` | Só o símbolo, fundo transparente |
 | `*-avatar.png` | 1024 x 1024 com fundo, pronto para foto de perfil (Instagram corta em círculo) |
 
+**Ciranda em uma cor** (para fundos coloridos, estampas e carimbos): `ciranda-branco.*` e `ciranda-marinho.*`, mais `ciranda-icone-branco.svg` e `ciranda-icone-marinho.svg`. A prancha `ciranda-fundos.png` mostra qual versão usar em cada fundo: **colorida** em branco, papel e tons claros; **escura** em azul-marinho, verde-escuro e preto; **branca** em vermelho, roxo e azul fortes; **azul-marinho** no amarelo.
+
 **Caminhos:** cinco trilhas, cada uma de uma cor, chegam à mesma estrela. **Ciranda:** oito crianças de mãos dadas, uma cor para cada categoria do site, em volta de um coração.
 
 ### Mockups (logo escolhida: Ciranda)
