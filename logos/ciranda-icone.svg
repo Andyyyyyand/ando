@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="Práticas Inclusivas, ícone Ciranda">
+<title>Práticas Inclusivas, ícone Ciranda</title>
+<path d="M100.8 61.0 A62 62 0 0 1 139.2 61.0" fill="none" stroke="#ec6a5c" stroke-width="24" stroke-linecap="round"/>
+<circle cx="120.0" cy="29.0" r="13" fill="#ec6a5c"/>
+<path d="M148.1 64.8 A62 62 0 0 1 175.2 91.9" fill="none" stroke="#ef8a3a" stroke-width="24" stroke-linecap="round"/>
+<circle cx="184.3" cy="55.7" r="13" fill="#ef8a3a"/>
+<path d="M179.0 100.8 A62 62 0 0 1 179.0 139.2" fill="none" stroke="#f2b134" stroke-width="24" stroke-linecap="round"/>
+<circle cx="211.0" cy="120.0" r="13" fill="#f2b134"/>
+<path d="M175.2 148.1 A62 62 0 0 1 148.1 175.2" fill="none" stroke="#33a37f" stroke-width="24" stroke-linecap="round"/>
+<circle cx="184.3" cy="184.3" r="13" fill="#33a37f"/>
+<path d="M139.2 179.0 A62 62 0 0 1 100.8 179.0" fill="none" stroke="#22a3a6" stroke-width="24" stroke-linecap="round"/>
+<circle cx="120.0" cy="211.0" r="13" fill="#22a3a6"/>
+<path d="M91.9 175.2 A62 62 0 0 1 64.8 148.1" fill="none" stroke="#4a8fdb" stroke-width="24" stroke-linecap="round"/>
+<circle cx="55.7" cy="184.3" r="13" fill="#4a8fdb"/>
+<path d="M61.0 139.2 A62 62 0 0 1 61.0 100.8" fill="none" stroke="#9677d6" stroke-width="24" stroke-linecap="round"/>
+<circle cx="29.0" cy="120.0" r="13" fill="#9677d6"/>
+<path d="M64.8 91.9 A62 62 0 0 1 91.9 64.8" fill="none" stroke="#e0659a" stroke-width="24" stroke-linecap="round"/>
+<circle cx="55.7" cy="55.7" r="13" fill="#e0659a"/>
+<path d="M120.0 150.9 C84.3 127.7 90.5 95.1 106.0 95.1 C114.4 95.1 120.0 101.9 120.0 108.1 C120.0 101.9 125.6 95.1 133.9 95.1 C149.4 95.1 155.7 127.7 120.0 150.9Z" fill="#243056"/>
+</svg>

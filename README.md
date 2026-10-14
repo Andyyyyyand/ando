@@ -58,6 +58,19 @@ O site lê esta planilha: https://docs.google.com/spreadsheets/d/1BKKcSiljjIs0mU
 
 Ela precisa estar compartilhada como **Qualquer pessoa com o link → Leitor**. As colunas são: Título da prática, Categoria, Para quem é, Situação, Estratégia (um passo por linha), Materiais, Tempo e Foto (link, opcional).
 
+## Logomarcas
+
+Pasta `logos/`, duas opções (o texto já está em curvas, não precisa instalar fonte):
+
+| Arquivo | Para quê |
+|---|---|
+| `caminhos-claro.svg/.png`, `ciranda-claro.svg/.png` | Fundo claro |
+| `caminhos-escuro.svg/.png`, `ciranda-escuro.svg/.png` | Fundo escuro |
+| `*-icone.svg` | Só o símbolo, fundo transparente |
+| `*-avatar.png` | 1024 x 1024 com fundo, pronto para foto de perfil (Instagram corta em círculo) |
+
+**Caminhos:** cinco trilhas, cada uma de uma cor, chegam à mesma estrela. **Ciranda:** oito crianças de mãos dadas, uma cor para cada categoria do site, em volta de um coração.
+
 ## Modo diurno e noturno
 
 O site abre no tema do celular. O botão sol/lua no canto superior direito troca na hora, e a escolha fica salva naquele aparelho. As cores de texto foram conferidas nos dois modos (contraste mínimo de 4,5:1, padrão WCAG AA).
