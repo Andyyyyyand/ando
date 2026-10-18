@@ -15,7 +15,7 @@ window.CONFIG = {
   // escolhido no cadastro: se o endereço for https://meusite.goatcounter.com, o código é "meusite".
   // Enquanto estiver vazio, nada é contado e a parte "Acompanhe o projeto" fica escondida.
   // No GoatCounter, ligue também: Settings > "Allow adding visitor counts on your website".
-  analytics: "",
+  analytics: "praticas",
 
   // Atalhos que aparecem embaixo da busca: [texto do botão, palavras buscadas].
   atalhosBusca: [

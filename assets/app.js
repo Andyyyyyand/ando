@@ -155,7 +155,8 @@
     const url = `https://${cfg.analytics}.goatcounter.com/counter/${encodeURIComponent(caminho)}.json`;
     const pedido = filaContagem = filaContagem.then(() =>
       fetch(url)
-        .then((r) => (r.ok ? r.json() : null))
+        // GoatCounter answers 404 with {"count":"0"} when nothing was counted yet, so read the body whatever the status.
+        .then((r) => r.json().catch(() => null))
         .then((j) => (j && j.count != null ? parseInt(String(j.count).replace(/\D/g, ""), 10) || 0 : null))
         .catch(() => null));
     cacheContagem.set(caminho, pedido);
@@ -164,6 +165,14 @@
 
   const formatar = (n) => n.toLocaleString("pt-BR");
 
+  // Shows the eye badge with a count. Stored on the element so a tap on the practice can add one live.
+  function mostrarOlhos(olho, n) {
+    olho.dataset.contagem = String(n);
+    olho.querySelector("b").textContent = formatar(n);
+    olho.querySelector(".olhos-texto").textContent = n === 1 ? " pessoa visualizou" : " pessoas visualizaram";
+    olho.hidden = n === 0;
+  }
+
   const observadorOlhos = cfg.analytics && "IntersectionObserver" in window ? new IntersectionObserver((entradas) => {
     entradas.forEach((e) => {
       if (!e.isIntersecting) return;
@@ -171,11 +180,7 @@
       const olho = e.target.querySelector(".olhos");
       if (!olho) return;
       lerContagem(olho.dataset.caminho).then((n) => {
-        if (n !== null) {
-          olho.querySelector("b").textContent = formatar(n);
-          olho.querySelector(".olhos-texto").textContent = n === 1 ? " pessoa visualizou" : " pessoas visualizaram";
-          olho.hidden = false;
-        }
+        if (n !== null) mostrarOlhos(olho, n);
       });
     });
   }, { rootMargin: "200px" }) : null;
@@ -207,7 +212,7 @@
       jaAcompanha = true;
       try { localStorage.setItem("pi-acompanha", "1"); } catch (e) { /* storage blocked */ }
       registrar(CAMINHO_ACOMPANHAR, "Acompanhar o projeto", false);
-      if (totalAcompanham !== null) totalAcompanham += 1;
+      totalAcompanham = (totalAcompanham ?? 0) + 1;
       pintar();
     });
 
@@ -465,6 +470,9 @@
     if (titulo && !praticasLidas.has(titulo)) {
       praticasLidas.add(titulo);
       registrar(caminhoDaPratica(titulo), titulo, false);
+      // Counts this reader right away; the server total is read again on the next page load.
+      const olho = card.querySelector(".olhos");
+      if (olho) mostrarOlhos(olho, Number(olho.dataset.contagem || 0) + 1);
     }
   }, true);
   $("filtros").addEventListener("click", (e) => {

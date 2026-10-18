@@ -302,8 +302,8 @@ details li::before {
   .btn-buscar { padding: 8px 14px; }
   .folha { padding: 26px 18px 22px 40px; }
   .folha::before { left: 26px; }
-  .chips { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding: 4px 16px 8px; scrollbar-width: none; }
-  .chips::-webkit-scrollbar { display: none; }
+  /* Chips wrap onto new lines so every category is visible without swiping sideways. */
+  .chips { flex-wrap: wrap; }
   .chip { flex: 0 0 auto; }
 }
 .insta.insta-breve { background: transparent; border: 2px dashed var(--rodape-texto); color: var(--rodape-texto); }
