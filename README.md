@@ -73,6 +73,10 @@ Pasta `logos/`, duas opções (o texto já está em curvas, não precisa instala
 
 **Caminhos:** cinco trilhas, cada uma de uma cor, chegam à mesma estrela. **Ciranda:** oito crianças de mãos dadas, uma cor para cada categoria do site, em volta de um coração.
 
+### Logo no site (Ciranda)
+
+O símbolo fica no topo, ao lado do título (o coração acompanha o tema claro/escuro), e a versão de uma cor no rodapé. Arquivos em `assets/`: `favicon.svg` e `favicon-32.png` (ícone da aba), `apple-touch-icon.png` (ícone ao salvar na tela inicial do celular) e `og.png` (imagem que aparece quando o link é compartilhado no WhatsApp, usando o endereço https://praticasinclusivas.online).
+
 ### Mockups (logo escolhida: Ciranda)
 
 Pasta `logos/mockups/`: perfil e post de Instagram, camisetas, ecobag, caderno, cartão de visita e cartaz, mais um quadro com as seis (`00-quadro.png`). São ilustrações para mostrar a ideia, não fotos de produtos reais. O perfil de exemplo não mostra números de seguidores e o nome de usuário não foi verificado no Instagram.
